@@ -7,29 +7,30 @@ interface HelpModalProps {
   isOpen: boolean;
   onClose: () => void;
   language: Language;
+  onSetupSync?: () => void;
 }
 
 type TabType = 'syntax' | 'sync' | 'hotkeys';
 
-const localTexts: Record<Language, { helpAndGuide: string; close: string; keyboardShortcuts: string; gotIt: string }> = {
-  de: { helpAndGuide: 'Hilfe & Anleitung', close: 'Schließen', keyboardShortcuts: 'Tastatur-Hotkeys', gotIt: 'Verstanden' },
-  en: { helpAndGuide: 'Help & Guide', close: 'Close', keyboardShortcuts: 'Keyboard Shortcuts', gotIt: 'Got it' },
-  la: { helpAndGuide: 'Auxilium & Regula', close: 'Claudere', keyboardShortcuts: 'Brevia Claviaturae', gotIt: 'Intellexi' },
-  fr: { helpAndGuide: 'Aide & Guide', close: 'Fermer', keyboardShortcuts: 'Raccourcis Clavier', gotIt: 'Compris' },
-  it: { helpAndGuide: 'Aiuto & Guida', close: 'Chiudi', keyboardShortcuts: 'Scorciatoie da Tastiera', gotIt: 'Capito' },
-  es: { helpAndGuide: 'Ayuda & Guía', close: 'Cerrar', keyboardShortcuts: 'Atajos de Teclado', gotIt: 'Entendido' },
-  zh: { helpAndGuide: '帮助与指南', close: '关闭', keyboardShortcuts: '键盘快捷键', gotIt: '知道了' },
-  ar: { helpAndGuide: 'المساعدة والدليل', close: 'إغلاق', keyboardShortcuts: 'اختصارات لوحة المفاتيح', gotIt: 'مفهوم' },
-  hi: { helpAndGuide: 'सहायता और गाइड', close: 'बंद करें', keyboardShortcuts: 'कीबोर्ड शॉर्टकट', gotIt: 'समझ गया' },
-  pt: { helpAndGuide: 'Ajuda & Guia', close: 'Fechar', keyboardShortcuts: 'Atalhos de Teclado', gotIt: 'Entendi' },
-  sw: { helpAndGuide: 'Hilf & Aleitung', close: 'Zuamacha', keyboardShortcuts: 'Taschdadur-Hotkeys', gotIt: 'Verstanda' },
-  uk: { helpAndGuide: 'Довідка та посібник', close: 'Закрити', keyboardShortcuts: 'Гарячі клавіші', gotIt: 'Зрозуміло' },
-  he: { helpAndGuide: 'עזרה ומדריך', close: 'סגור', keyboardShortcuts: 'קיצורי מקלדת', gotIt: 'הבנתי' },
-  el: { helpAndGuide: 'Βοήθεια & Οδηγός', close: 'Κλείσιμο', keyboardShortcuts: 'Συντομεύσεις Πληκτρολογίου', gotIt: 'Κατανοητό' },
-  tr: { helpAndGuide: 'Yardım ve Kılavuz', close: 'Kapat', keyboardShortcuts: 'Klavye Kısayolları', gotIt: 'Anlaşıldı' }
+const localTexts: Record<Language, { helpAndGuide: string; close: string; keyboardShortcuts: string; gotIt: string; setupSync: string }> = {
+  de: { helpAndGuide: 'Hilfe & Anleitung', close: 'Schließen', keyboardShortcuts: 'Tastatur-Hotkeys', gotIt: 'Verstanden', setupSync: 'Synchronisation / Cloud-Verbindung einrichten' },
+  en: { helpAndGuide: 'Help & Guide', close: 'Close', keyboardShortcuts: 'Keyboard Shortcuts', gotIt: 'Got it', setupSync: 'Set up synchronization / cloud connection' },
+  la: { helpAndGuide: 'Auxilium & Regula', close: 'Claudere', keyboardShortcuts: 'Brevia Claviaturae', gotIt: 'Intellexi', setupSync: 'Synchronisationem / Nexum nubis constituere' },
+  fr: { helpAndGuide: 'Aide & Guide', close: 'Fermer', keyboardShortcuts: 'Raccourcis Clavier', gotIt: 'Compris', setupSync: 'Configurer la synchronisation / connexion cloud' },
+  it: { helpAndGuide: 'Aiuto & Guida', close: 'Chiudi', keyboardShortcuts: 'Scorciatoie da Tastiera', gotIt: 'Capito', setupSync: 'Configura sincronizzazione / connessione cloud' },
+  es: { helpAndGuide: 'Ayuda & Guía', close: 'Cerrar', keyboardShortcuts: 'Atajos de Teclado', gotIt: 'Entendido', setupSync: 'Configurar sincronización / conexión en la nube' },
+  zh: { helpAndGuide: '帮助与指南', close: '关闭', keyboardShortcuts: '键盘快捷键', gotIt: '知道了', setupSync: '设置同步 / 云连接' },
+  ar: { helpAndGuide: 'المساعدة والدليل', close: 'إغلاق', keyboardShortcuts: 'اختصارات لوحة المفاتيح', gotIt: 'مفهوم', setupSync: 'إعداد المزامنة / الاتصال السحابي' },
+  hi: { helpAndGuide: 'सहायता और गाइड', close: 'बंद करें', keyboardShortcuts: 'कीबोर्ड शॉर्टकट', gotIt: 'समझ गया', setupSync: 'सिंक्रनाइज़ेशन / क्लाउड कनेक्शन सेटअप करें' },
+  pt: { helpAndGuide: 'Ajuda & Guia', close: 'Fechar', keyboardShortcuts: 'Atalhos de Teclado', gotIt: 'Entendi', setupSync: 'Configurar sincronização / conexão de nuvem' },
+  sw: { helpAndGuide: 'Hilf & Aleitung', close: 'Zuamacha', keyboardShortcuts: 'Taschdadur-Hotkeys', gotIt: 'Verstanda', setupSync: 'Mipangilio ya maingiliano / wingu nexum' },
+  uk: { helpAndGuide: 'Довідка та посібник', close: 'Закрити', keyboardShortcuts: 'Гарячі клавіші', gotIt: 'Зрозуміло', setupSync: 'Налаштувати синхронізацію / хмарне підключення' },
+  he: { helpAndGuide: 'עזרה ומדריך', close: 'סגור', keyboardShortcuts: 'קיצורי מקלדת', gotIt: 'הבנתי', setupSync: 'הגדרת סנכרון / חיבור לענן' },
+  el: { helpAndGuide: 'Βοήθεια & Οδηγός', close: 'Κλείσιμο', keyboardShortcuts: 'Συντομεύσεις Πληκτρολογίου', gotIt: 'Κατανοητό', setupSync: 'Ρύθμιση συγχρονισμού / σύνδεσης cloud' },
+  tr: { helpAndGuide: 'Yardım ve Kılavuz', close: 'Kapat', keyboardShortcuts: 'Klavye Kısayolları', gotIt: 'Anlaşıldı', setupSync: 'Senkronizasyon / bulut bağlantısı ayarla' }
 };
 
-export const HelpModal = ({ isOpen, onClose, language }: HelpModalProps) => {
+export const HelpModal = ({ isOpen, onClose, language, onSetupSync }: HelpModalProps) => {
   const [activeTab, setActiveTab] = useState<TabType>('syntax');
 
   if (!isOpen) return null;
@@ -78,7 +79,7 @@ export const HelpModal = ({ isOpen, onClose, language }: HelpModalProps) => {
                 : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900/35'
             }`}
           >
-            <Cloud size={15} /> OneDrive Sync
+            <Cloud size={15} /> Sync und Speichern
           </button>
           <button
             onClick={() => setActiveTab('hotkeys')}
@@ -147,6 +148,20 @@ export const HelpModal = ({ isOpen, onClose, language }: HelpModalProps) => {
                   </div>
                 ))}
               </div>
+
+              {onSetupSync && (
+                <div className="pt-4 border-t border-slate-200 dark:border-slate-800/80 flex justify-end">
+                  <button
+                    onClick={() => {
+                      onClose();
+                      onSetupSync();
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-indigo-650 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer"
+                  >
+                    <Cloud size={14} /> {texts.setupSync}
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

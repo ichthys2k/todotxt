@@ -15,10 +15,15 @@ function App() {
   const [storageMode, setStorageMode] = useState<'local' | 'onedrive' | 'webdav' | 'git' | 'gdrive' | null>(() => {
     const isElectron = typeof window !== 'undefined' && window.navigator.userAgent.toLowerCase().includes('electron');
     const lastMode = localStorage.getItem('todo_txt_last_mode');
+    const localSetupComplete = localStorage.getItem('todo_txt_local_setup_complete');
+
     if (isElectron && lastMode === 'onedrive') {
       return null;
     }
     if (!lastMode) {
+      if (localSetupComplete === 'true') {
+        return null;
+      }
       localStorage.setItem('todo_txt_last_mode', 'local');
       localStorage.setItem('todo_txt_onboarding_active', 'true');
       localStorage.setItem('todo_txt_onboarding_syntax_active', 'true');
@@ -61,6 +66,16 @@ function App() {
 
   useEffect(() => {
     applyTheme();
+
+    // Splash-Screen ausblenden und entfernen sobald die App bereit ist
+    const splash = document.getElementById('splash-screen');
+    if (splash) {
+      splash.style.opacity = '0';
+      splash.style.visibility = 'hidden';
+      setTimeout(() => {
+        splash.remove();
+      }, 400);
+    }
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (['Shift', 'Control', 'Alt', 'Meta'].includes(e.key)) return;
@@ -148,6 +163,9 @@ function App() {
         <TodoApp 
           storageMode={storageMode} 
           onLogout={() => {
+            if (storageMode) {
+              localStorage.setItem('todo_txt_prev_storage_mode', storageMode);
+            }
             if (storageMode === 'onedrive') {
               logout();
             } else if (storageMode === 'webdav') {
@@ -159,6 +177,14 @@ function App() {
             }
             setStorageMode(null);
             localStorage.removeItem('todo_txt_last_mode');
+          }}
+          onSetupSync={() => {
+            if (storageMode) {
+              localStorage.setItem('todo_txt_prev_storage_mode', storageMode);
+            }
+            setStorageMode(null);
+            localStorage.removeItem('todo_txt_last_mode');
+            localStorage.removeItem('todo_txt_onboarding_active');
           }}
           username={
             storageMode === 'onedrive' && isAuthenticated && accounts[0]

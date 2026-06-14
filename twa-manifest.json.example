@@ -1,7 +1,7 @@
 {
   "packageId": "your.package.id.twa",
   "host": "yourdomain.com",
-  "name": "Todo.txt WebApp",
+  "name": "Todo.txt",
   "launcherName": "TodoApp",
   "display": "standalone",
   "themeColor": "#0F172A",

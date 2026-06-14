@@ -319,4 +319,16 @@
   animation: levelUpGlow 2s ease-in-out infinite;
 }
 
+/* Fix Google Picker Dialog visibility and clickability on mobile devices */
+.picker-dialog {
+  z-index: 2000000000 !important;
+  pointer-events: auto !important;
+}
+
+.picker-dialog-bg {
+  z-index: 1999999999 !important;
+  pointer-events: auto !important;
+}
+
+
 

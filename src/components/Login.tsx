@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { loginWithMicrosoft } from '../services/authService';
 import { useGoogleLogin } from '@react-oauth/google';
+import { X } from 'lucide-react';
 
 interface LoginProps {
   onLocalMode: () => void;
@@ -48,7 +49,14 @@ export const Login = ({ onLocalMode, onWebDavMode, onGitMode, onGoogleDriveMode,
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-8 text-center">
+      <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-8 text-center relative">
+        <button 
+          onClick={onLocalMode}
+          className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer border-none bg-transparent"
+          title="Schließen / Lokal fortfahren"
+        >
+          <X size={18} />
+        </button>
         <img 
           src="./apple-touch-icon.png" 
           alt="Todo.txt Logo" 

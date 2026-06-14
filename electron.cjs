@@ -1,11 +1,15 @@
-const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog, Tray, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { autoUpdater } = require('electron-updater');
 
 let mainWindow;
+let tray = null;
+let isQuitting = false;
+
 
 // ---------------------------------------------------------------------------
-// Persistent config: store file paths in %AppData%/Todo.txt Web App/
+// Persistent config: store file paths in %AppData%/Todo.txt/
 // ---------------------------------------------------------------------------
 
 function getConfigPath() {
@@ -77,7 +81,7 @@ function createWindow() {
       sandbox: false,                              // must be false for preload require()
       preload: path.join(__dirname, 'preload.cjs'), // contextBridge → window.electronAPI
     },
-    title: 'Todo.txt Web App',
+    title: 'Todo.txt',
   });
 
   // Check if we are in development mode
@@ -89,13 +93,129 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, 'dist', 'index.html'));
   }
 
+  mainWindow.on('close', (event) => {
+    if (!isQuitting) {
+      event.preventDefault();
+      mainWindow.hide();
+    }
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
 }
 
+function showTrayWindow(bounds) {
+  if (!mainWindow) return;
+
+  const trayBounds = bounds || (tray ? tray.getBounds() : null);
+  const display = trayBounds
+    ? screen.getDisplayMatching(trayBounds)
+    : screen.getPrimaryDisplay();
+  const { width: screenWidth, height: screenHeight, x: displayX, y: displayY } = display.workArea;
+
+  const winWidth = 380;
+  const winHeight = 700;
+
+  // Default to bottom-right placement
+  let x = displayX + screenWidth - winWidth - 10;
+  let y = displayY + screenHeight - winHeight - 10;
+
+  if (trayBounds) {
+    // If the tray is at the bottom half of the screen
+    if (trayBounds.y > displayY + screenHeight / 2) {
+      x = Math.max(displayX + 10, Math.min(displayX + screenWidth - winWidth - 10, trayBounds.x + (trayBounds.width / 2) - (winWidth / 2)));
+      y = trayBounds.y - winHeight - 5;
+    }
+    // If the tray is at the top half of the screen
+    else {
+      x = Math.max(displayX + 10, Math.min(displayX + screenWidth - winWidth - 10, trayBounds.x + (trayBounds.width / 2) - (winWidth / 2)));
+      y = trayBounds.y + trayBounds.height + 5;
+    }
+  }
+
+  mainWindow.setSize(winWidth, winHeight);
+  mainWindow.setPosition(Math.round(x), Math.round(y));
+  mainWindow.show();
+  mainWindow.focus();
+}
+
+function createTray() {
+  const iconPath = path.join(__dirname, 'public', 'icon.png');
+  tray = new Tray(iconPath);
+  tray.setToolTip('Todo.txt');
+
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Hauptfenster anzeigen',
+      click: () => {
+        if (!mainWindow) {
+          createWindow();
+        }
+        mainWindow.setSize(1200, 800);
+        mainWindow.center();
+        mainWindow.show();
+        mainWindow.focus();
+      }
+    },
+    {
+      label: 'Mobilansicht anzeigen',
+      click: (event) => {
+        if (!mainWindow) {
+          createWindow();
+        }
+        showTrayWindow();
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'Beenden',
+      click: () => {
+        isQuitting = true;
+        app.quit();
+      }
+    }
+  ]);
+
+  tray.setContextMenu(contextMenu);
+
+  tray.on('click', (event, bounds) => {
+    if (!mainWindow) {
+      createWindow();
+      showTrayWindow(bounds);
+    } else if (mainWindow.isVisible()) {
+      mainWindow.hide();
+    } else {
+      showTrayWindow(bounds);
+    }
+  });
+}
+
 app.on('ready', () => {
   createWindow();
+  createTray();
+
+  // Auto-Update Events & Check
+  autoUpdater.on('update-downloaded', (info) => {
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'Update verfügbar',
+      message: `Eine neue Version (${info.version}) wurde heruntergeladen und wird beim nächsten Start installiert.`,
+      buttons: ['Jetzt neu starten', 'Später']
+    }).then((result) => {
+      if (result.response === 0) {
+        autoUpdater.quitAndInstall();
+      }
+    });
+  });
+
+  if (app.isPackaged) {
+    setTimeout(() => {
+      autoUpdater.checkForUpdatesAndNotify().catch((err) => {
+        console.error('Fehler beim Suchen nach Updates:', err);
+      });
+    }, 3000);
+  }
 
   // Application menu
   const template = [
@@ -136,7 +256,12 @@ app.on('ready', () => {
   Menu.setApplicationMenu(menu);
 });
 
+app.on('before-quit', () => {
+  isQuitting = true;
+});
+
 app.on('window-all-closed', () => {
+
   if (process.platform !== 'darwin') {
     app.quit();
   }

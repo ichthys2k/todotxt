@@ -27,6 +27,7 @@ interface TodoListProps {
   activeSmartView?: string | null;
   onAddTask?: (rawText: string) => void;
   language: Language;
+  onSetupSync?: () => void;
 }
 
 const getTodayDateStr = (): string => {
@@ -74,7 +75,8 @@ export const TodoList = ({
   contextEmojis = {},
   activeSmartView,
   onAddTask,
-  language
+  language,
+  onSetupSync
 }: TodoListProps) => {
   const [isOnboardingActive, setIsOnboardingActive] = useState(() => {
     return localStorage.getItem('todo_txt_onboarding_active') === 'true';
@@ -94,9 +96,14 @@ export const TodoList = ({
   };
 
   const handleSetupSync = () => {
-    localStorage.removeItem('todo_txt_last_mode');
     localStorage.removeItem('todo_txt_onboarding_active');
-    window.location.reload();
+    setIsOnboardingActive(false);
+    if (onSetupSync) {
+      onSetupSync();
+    } else {
+      localStorage.removeItem('todo_txt_last_mode');
+      window.location.reload();
+    }
   };
 
 

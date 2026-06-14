@@ -18,7 +18,7 @@ import { existsSync } from 'fs';
 // Dedicated temp folder — separate from dist-desktop so a running app
 // never causes EBUSY / EPERM errors.
 const TEMP_OUT  = 'dist-portable-tmp';
-const APP_DIR   = `${TEMP_OUT}\\Todo.txt Web App-win32-x64`;
+const APP_DIR   = `${TEMP_OUT}\\Todo.txt-win32-x64`;
 const ZIP_OUT   = 'dist-desktop\\TodoTxt-Windows-Portable.zip';
 
 // ── 1. Vite / TypeScript build ────────────────────────────────────────────────
@@ -37,7 +37,7 @@ if (existsSync(TEMP_OUT)) {
 // ── 3. Package app to temp dir ────────────────────────────────────────────────
 console.log('\n⚙️   Erstelle Electron-App …');
 execSync(
-  `electron-packager . "Todo.txt Web App" --platform=win32 --arch=x64 --out=${TEMP_OUT}`,
+  `electron-packager . "Todo.txt" --platform=win32 --arch=x64 --out=${TEMP_OUT} --ignore="/(dist-desktop|dist-portable-tmp|android|\\.git|\\.gradle|build)/"`,
   { stdio: 'inherit' }
 );
 
@@ -69,4 +69,4 @@ execSync(
 );
 
 console.log(`\n✅  Portable App fertig: ${ZIP_OUT}`);
-console.log('   → ZIP entpacken und "Todo.txt Web App.exe" starten.\n');
+console.log('   → ZIP entpacken und "Todo.txt.exe" starten.\n');

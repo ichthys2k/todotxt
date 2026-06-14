@@ -146,7 +146,7 @@ export class GitSyncProvider implements SyncProvider {
 
     try {
       const body: any = {
-        message: `Update ${path} via TodotxtWebApp`,
+        message: `Update ${path} via Todo.txt`,
         content: encodeBase64(content)
       };
       if (sha) {
@@ -187,7 +187,7 @@ export class GitSyncProvider implements SyncProvider {
           
           // 4. Erneuter Speicherversuch mit zusammengeführtem Inhalt und neuem SHA
           const retryBody: any = {
-            message: `Auto-merged update of ${path} via TodotxtWebApp`,
+            message: `Auto-merged update of ${path} via Todo.txt`,
             content: encodeBase64(mergedContent),
             sha: remoteSha
           };

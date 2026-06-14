@@ -13,9 +13,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png', 'icon.png'],
       manifest: {
-        name: 'Todo.txt WebApp',
+        name: 'Todo.txt',
         short_name: 'TodoApp',
-        description: 'Eine elegante, OneDrive-synchronisierte Todo.txt WebApp',
+        description: 'Eine elegante, OneDrive-synchronisierte Todo.txt',
         theme_color: '#0f172a',
         background_color: '#0f172a',
         display: 'standalone',

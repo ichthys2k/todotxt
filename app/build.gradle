@@ -24,7 +24,7 @@ def twaManifest = [
     applicationId: 'de.lipponer.www.twa',
     hostName: 'www.lipponer.de', // The domain being opened in the TWA.
     launchUrl: '/2do/', // The start path for the TWA. Must be relative to the domain.
-    name: 'Todo.txt WebApp', // The application name.
+    name: 'Todo.txt', // The application name.
     launcherName: 'TodoApp', // The name shown on the Android Launcher.
     themeColor: '#0F172A', // The color used for the status bar.
     themeColorDark: '#000000', // The color used for the dark status bar.
@@ -57,8 +57,8 @@ android {
         applicationId "de.lipponer.www.twa"
         minSdkVersion 21
         targetSdkVersion 35
-        versionCode 3
-        versionName "1.1.0"
+        versionCode 6
+        versionName "1.2.0"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name

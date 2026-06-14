@@ -54,6 +54,7 @@ export const GoogleDrivePicker = ({ onFileSelected, onCancel }: GoogleDrivePicke
       multiselect: false,
       customViews: customViews,
       disableDefaultView: !!customViews,
+      setOrigin: window.location.origin,
       callbackFunction: (data: any) => {
         console.log('Google Picker Callback (Todo):', data);
         if (data.action === 'picked') {
@@ -84,6 +85,7 @@ export const GoogleDrivePicker = ({ onFileSelected, onCancel }: GoogleDrivePicke
       multiselect: false,
       customViews: customViews,
       disableDefaultView: !!customViews,
+      setOrigin: window.location.origin,
       callbackFunction: (data: any) => {
         console.log('Google Picker Callback (Archive):', data);
         if (data.action === 'picked') {

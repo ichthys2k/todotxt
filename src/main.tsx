@@ -13,7 +13,7 @@ if ('serviceWorker' in navigator) {
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
-// Google Cloud Client ID für Todo.txt Web App
+// Google Cloud Client ID für Todo.txt
 export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 // Google Cloud Projektnummer / App-ID (erforderlich für drive.file Scope im Picker)

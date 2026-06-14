@@ -1,4 +1,6 @@
 import type { SyncProvider } from './SyncProvider';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 
 declare global {
   interface Window {
@@ -164,8 +166,44 @@ export const selectElectronFile = async (title: string): Promise<string | null> 
   return await window.electronAPI.selectFile(title);
 };
 
+// --- CAPACITOR HELPERS ---
+
+const ensureCapacitorPermissions = async (): Promise<boolean> => {
+  if (!Capacitor.isNativePlatform()) return true;
+  try {
+    const status = await Filesystem.checkPermissions();
+    if (status.publicStorage !== 'granted') {
+      const requestStatus = await Filesystem.requestPermissions();
+      return requestStatus.publicStorage === 'granted';
+    }
+    return true;
+  } catch (e) {
+    console.error('Error checking Capacitor permissions', e);
+    return false;
+  }
+};
+
+
 export class LocalSyncProvider implements SyncProvider {
   async fetchTodoContent(): Promise<string> {
+    if (Capacitor.isNativePlatform()) {
+      await ensureCapacitorPermissions();
+      try {
+        const result = await Filesystem.readFile({
+          path: 'todo.txt',
+          directory: Directory.Documents,
+          encoding: Encoding.UTF8
+        });
+        const text = result.data as string;
+        localStorage.setItem(LOCAL_STORAGE_KEY, text);
+        return text;
+      } catch (e: any) {
+        console.warn('Capacitor: Failed to read todo.txt. Might not exist yet.', e);
+        const localContent = localStorage.getItem(LOCAL_STORAGE_KEY);
+        return localContent !== null ? localContent : '';
+      }
+    }
+
     if (window.electronAPI) {
       const paths = await window.electronAPI.getPaths();
       if (paths.todo) {
@@ -205,6 +243,23 @@ export class LocalSyncProvider implements SyncProvider {
 
   async saveTodoContent(content: string): Promise<string> {
     localStorage.setItem(LOCAL_STORAGE_KEY, content);
+
+    if (Capacitor.isNativePlatform()) {
+      await ensureCapacitorPermissions();
+      try {
+        await Filesystem.writeFile({
+          path: 'todo.txt',
+          data: content,
+          directory: Directory.Documents,
+          encoding: Encoding.UTF8
+        });
+      } catch (e: any) {
+        console.error('Capacitor: Failed to write todo.txt', e);
+        throw new Error('FILE_WRITE_FAILED');
+      }
+      return content;
+    }
+
     if (window.electronAPI) {
       const paths = await window.electronAPI.getPaths();
       if (paths.todo) {
@@ -238,6 +293,24 @@ export class LocalSyncProvider implements SyncProvider {
   }
 
   async fetchArchiveContent(): Promise<string> {
+    if (Capacitor.isNativePlatform()) {
+      await ensureCapacitorPermissions();
+      try {
+        const result = await Filesystem.readFile({
+          path: 'archive.txt',
+          directory: Directory.Documents,
+          encoding: Encoding.UTF8
+        });
+        const text = result.data as string;
+        localStorage.setItem(LOCAL_ARCHIVE_KEY, text);
+        return text;
+      } catch (e: any) {
+        console.warn('Capacitor: Failed to read archive.txt. Might not exist yet.', e);
+        const localContent = localStorage.getItem(LOCAL_ARCHIVE_KEY);
+        return localContent !== null ? localContent : '';
+      }
+    }
+
     if (window.electronAPI) {
       const paths = await window.electronAPI.getPaths();
       if (paths.archive) {
@@ -277,6 +350,23 @@ export class LocalSyncProvider implements SyncProvider {
 
   async saveArchiveContent(content: string): Promise<string> {
     localStorage.setItem(LOCAL_ARCHIVE_KEY, content);
+
+    if (Capacitor.isNativePlatform()) {
+      await ensureCapacitorPermissions();
+      try {
+        await Filesystem.writeFile({
+          path: 'archive.txt',
+          data: content,
+          directory: Directory.Documents,
+          encoding: Encoding.UTF8
+        });
+      } catch (e: any) {
+        console.error('Capacitor: Failed to write archive.txt', e);
+        throw new Error('ARCHIVE_FILE_WRITE_FAILED');
+      }
+      return content;
+    }
+
     if (window.electronAPI) {
       const paths = await window.electronAPI.getPaths();
       if (paths.archive) {
@@ -310,12 +400,45 @@ export class LocalSyncProvider implements SyncProvider {
   }
 
   async fetchConfigContent(): Promise<string> {
+    if (Capacitor.isNativePlatform()) {
+      await ensureCapacitorPermissions();
+      try {
+        const result = await Filesystem.readFile({
+          path: 'todo.config.json',
+          directory: Directory.Documents,
+          encoding: Encoding.UTF8
+        });
+        const text = result.data as string;
+        localStorage.setItem(LOCAL_CONFIG_KEY, text);
+        return text;
+      } catch (e: any) {
+        console.warn('Capacitor: Failed to read config. Might not exist yet.', e);
+        const localContent = localStorage.getItem(LOCAL_CONFIG_KEY);
+        return localContent !== null ? localContent : '{}';
+      }
+    }
+
     const localContent = localStorage.getItem(LOCAL_CONFIG_KEY);
     return localContent !== null ? localContent : '{}';
   }
 
   async saveConfigContent(content: string): Promise<string> {
     localStorage.setItem(LOCAL_CONFIG_KEY, content);
+
+    if (Capacitor.isNativePlatform()) {
+      await ensureCapacitorPermissions();
+      try {
+        await Filesystem.writeFile({
+          path: 'todo.config.json',
+          data: content,
+          directory: Directory.Documents,
+          encoding: Encoding.UTF8
+        });
+      } catch (e: any) {
+        console.error('Capacitor: Failed to write config', e);
+      }
+    }
+
     return content;
   }
 
