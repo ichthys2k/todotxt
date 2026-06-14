@@ -21,9 +21,18 @@ Eine elegante, moderne und serverlose WebApp zur Verwaltung von Aufgaben im stan
 
 ## Android App (TWA)
 
-Die App kann als Android-App auf Mobilgeräten installiert werden. Die fertig signierte APK-Datei kannst du direkt hier herunterladen:
+Die App kann als Android-App auf Mobilgeräten installiert werden.
 
-*   📱 **[Android APK herunterladen](./TodoTxt-Android-Release.apk)** – Installiert die App auf deinem Android-Gerät.
+### 🧪 Werde Beta-Tester im Google Play Store!
+
+Um die App im Google Play Store offiziell veröffentlichen zu können, werden aktuell Beta-Tester gesucht. Du kannst dem Test-Programm über diese Links beitreten und Feedback geben:
+
+*   🌐 **[Teilnahme am Test im Web](https://play.google.com/apps/testing/de.lipponer.www.twa)** (Aktivierung des Test-Zugangs über dein Google-Konto)
+*   📱 **[Teilnahme über Google Play auf dem Smartphone](https://play.google.com/store/apps/details?id=de.lipponer.www.twa)** (Direkter Download/Update über die Google Play App)
+
+Alternativ kannst du die App auch manuell als APK herunterladen und installieren:
+
+*   📦 **[Android APK herunterladen](./TodoTxt-Android-Release.apk)** – Direkt-Download der fertig signierten APK-Datei.
 
 Für Entwickler: Die App kann mit [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap) verpackt werden.
 - Eine Vorlage für die Bubblewrap-Konfiguration findest du in `twa-manifest.json.example`.
