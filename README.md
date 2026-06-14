@@ -10,7 +10,7 @@ Eine elegante, moderne und serverlose WebApp zur Verwaltung von Aufgaben im stan
   - **Google Drive Sync:** Nutze deinen Google-Speicher.
   - **WebDAV:** Synchronisiere mit deiner Nextcloud, ownCloud oder anderen WebDAV-Servern.
   - **GitHub/Git Sync:** Sichere deine Aufgaben direkt in einem Git-Repository.
-  - **Lokal:** Nutze die App ohne Anmeldung (Daten verbleiben im Browser-Speicher).
+  - **Lokal:** Nutze die App ohne Anmeldung (Daten verbleiben im Browser-Speicher oder werden mit dem lokalen Dateisystem abgegelichen).
 - 📊 **Produktivitäts-Dashboard:** Behalte deinen Fortschritt im Blick.
 - 🌓 **Dark Mode:** Modernes Design mit automatischer Theme-Unterstützung.
 - 📱 **Progressive Web App (PWA):** Kann als eigenständige App auf Mobilgeräten und Desktops installiert werden.
