@@ -19,7 +19,42 @@ Eine elegante, moderne und serverlose WebApp zur Verwaltung von Aufgaben im stan
 
 ---
 
-## Installation & Lokale Ausführung
+## Android App (TWA)
+
+Die App kann als Android-App auf Mobilgeräten installiert werden. Die fertig signierte APK-Datei kannst du direkt hier herunterladen:
+
+*   📱 **[Android APK herunterladen](./TodoTxt-Android-Release.apk)** – Installiert die App auf deinem Android-Gerät.
+
+Für Entwickler: Die App kann mit [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap) verpackt werden.
+- Eine Vorlage für die Bubblewrap-Konfiguration findest du in `twa-manifest.json.example`.
+- Kopiere diese Datei zu `twa-manifest.json` und passe die Domain, Package ID sowie den Pfad zu deinem lokalen `keystore` an.
+- Die echte `twa-manifest.json` sowie deine `.keystore`-Dateien sind bereits in `.gitignore` eingetragen und werden nicht hochgeladen.
+
+---
+
+## Desktop App (Windows)
+
+Die App ist auch als Desktop-Anwendung für Windows verfügbar. Du kannst die fertig kompilierten Versionen direkt aus dem Repository herunterladen:
+
+*   💾 **[Windows-Installer (Setup) herunterladen](./dist-desktop/TodoTxt-Windows-Setup.exe)** – Installiert die App auf deinem System und erstellt Verknüpfungen im Startmenü sowie auf dem Desktop.
+*   🚀 **[Portable EXE herunterladen](./dist-desktop/TodoTxt-Windows-Portable.exe)** – Eine eigenständige `.exe`-Datei, die direkt ohne Installation gestartet werden kann.
+*   📦 **[Portable ZIP herunterladen](./dist-desktop/TodoTxt-Windows-Portable.zip)** – Die portable Version als ZIP-Archiv verpackt.
+
+Um die Desktop-Version lokal selbst zu kompilieren:
+```bash
+# Erstellt die portable ZIP-Version
+npm run electron:portable
+
+# Erstellt die portable EXE-Version
+npm run electron:exe
+
+# Erstellt das installierbare Windows-Setup (Installer)
+npm run electron:installer
+```
+
+---
+
+## Installation & Lokale Ausführung (Entwicklung)
 
 ### Voraussetzungen
 
@@ -79,43 +114,6 @@ Die App benötigt Umgebungsvariablen, um sich mit den jeweiligen APIs zu verbind
   - Eine **OAuth-Client-ID** (Plattform: Webanwendung) -> Trage die Client-ID bei `VITE_GOOGLE_CLIENT_ID` ein.
   - Einen **API-Schlüssel** -> Trage den API-Schlüssel bei `VITE_GOOGLE_API_KEY` ein.
 - Trage deine Google-Projektnummer (nur Ziffern aus der Client-ID) bei `VITE_GOOGLE_APP_ID` ein.
-
----
-
-## Android App (TWA)
-
-Die App kann als Android-App auf Mobilgeräten installiert werden. Die fertig signierte APK-Datei kannst du direkt hier herunterladen:
-
-*   📱 **[Android APK herunterladen](./TodoTxt-Android-Release.apk)** – Installiert die App auf deinem Android-Gerät.
-
-Für Entwickler: Die App kann mit [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap) verpackt werden.
-- Eine Vorlage für die Bubblewrap-Konfiguration findest du in `twa-manifest.json.example`.
-- Kopiere diese Datei zu `twa-manifest.json` und passe die Domain, Package ID sowie den Pfad zu deinem lokalen `keystore` an.
-- Die echte `twa-manifest.json` sowie deine `.keystore`-Dateien sind bereits in `.gitignore` eingetragen und werden nicht hochgeladen.
-
----
-
----
-
-## Desktop App (Windows)
-
-Die App ist auch als Desktop-Anwendung für Windows verfügbar. Du kannst die fertig kompilierten Versionen direkt aus dem Repository herunterladen:
-
-*   💾 **[Windows-Installer (Setup) herunterladen](./dist-desktop/TodoTxt-Windows-Setup.exe)** – Installiert die App auf deinem System und erstellt Verknüpfungen im Startmenü sowie auf dem Desktop.
-*   🚀 **[Portable EXE herunterladen](./dist-desktop/TodoTxt-Windows-Portable.exe)** – Eine eigenständige `.exe`-Datei, die direkt ohne Installation gestartet werden kann.
-*   📦 **[Portable ZIP herunterladen](./dist-desktop/TodoTxt-Windows-Portable.zip)** – Die portable Version als ZIP-Archiv verpackt.
-
-Um die Desktop-Version lokal selbst zu kompilieren:
-```bash
-# Erstellt die portable ZIP-Version
-npm run electron:portable
-
-# Erstellt die portable EXE-Version
-npm run electron:exe
-
-# Erstellt das installierbare Windows-Setup (Installer)
-npm run electron:installer
-```
 
 ---
 
