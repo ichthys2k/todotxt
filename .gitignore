@@ -43,3 +43,6 @@ twa-manifest.json
 *.idsig
 dist/
 dist-desktop/
+!dist-desktop/TodoTxt-Windows-Setup.exe
+!dist-desktop/TodoTxt-Windows-Portable.exe
+!dist-desktop/TodoTxt-Windows-Portable.zip
