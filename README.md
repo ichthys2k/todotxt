@@ -19,35 +19,47 @@ Eine elegante, moderne und serverlose WebApp zur Verwaltung von Aufgaben im stan
 
 ---
 
-## Android App (TWA)
+## Android App (Native & Offline-First)
 
-Die App kann als Android-App auf Mobilgeräten installiert werden.
+Die App ist als native Android-Anwendung konzipiert und nutzt **Capacitor** für eine offline-first Architektur. Daten werden lokal auf dem Gerät vorgehalten und automatisch synchronisiert, sobald eine Internetverbindung besteht. Diese native Architektur ist plattformübergreifend vorbereitet, um künftig auch einen iOS-Release zu ermöglichen.
 
 ### 🧪 Werde Beta-Tester im Google Play Store!
 
-Um die App im Google Play Store offiziell veröffentlichen zu können, werden aktuell Beta-Tester gesucht. Du kannst dem Test-Programm über diese Links beitreten und Feedback geben:
+Um die App im Google Play Store offiziell veröffentlichen zu können, werden aktuell Beta-Tester gesucht:
 
 *   🌐 **[Teilnahme am Test im Web](https://play.google.com/apps/testing/de.lipponer.www.twa)** (Aktivierung des Test-Zugangs über dein Google-Konto)
 *   📱 **[Teilnahme über Google Play auf dem Smartphone](https://play.google.com/store/apps/details?id=de.lipponer.www.twa)** (Direkter Download/Update über die Google Play App)
 
-Alternativ kannst du die App auch manuell als APK herunterladen und installieren:
+Alternativ kannst du die App auch manuell als native APK herunterladen und installieren:
 
 *   📦 **[Android APK herunterladen](./TodoTxt-Android-Release.apk)** – Direkt-Download der fertig signierten APK-Datei.
 
-Für Entwickler: Die App kann mit [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap) verpackt werden.
-- Eine Vorlage für die Bubblewrap-Konfiguration findest du in `twa-manifest.json.example`.
-- Kopiere diese Datei zu `twa-manifest.json` und passe die Domain, Package ID sowie den Pfad zu deinem lokalen `keystore` an.
-- Die echte `twa-manifest.json` sowie deine `.keystore`-Dateien sind bereits in `.gitignore` eingetragen und werden nicht hochgeladen.
+### Für Entwickler (Capacitor Workflow):
+Die App wird über Capacitor verwaltet. Um Assets zu kompilieren, zu kopieren und die native App zu starten:
+```bash
+# Baut die Web-App und synchronisiert alle Assets mit dem Android-Projekt
+npm run cap:build
+
+# Öffnet das Android-Projekt direkt in Android Studio
+npm run cap:open
+```
 
 ---
 
-## Desktop App (Windows)
+## Desktop App (Windows / Electron)
 
-Die App ist auch als Desktop-Anwendung für Windows verfügbar. Du kannst die fertig kompilierten Versionen direkt aus dem Repository herunterladen:
+Die App bietet unter Windows eine tiefe Systemintegration über **Electron** mit folgenden Highlights:
+
+- 📥 **Standardmäßiges Tray-Icon:** Die App läuft unauffällig im Hintergrund in der Infoleiste (System Tray).
+- 📱 **Schnelle Mobilansicht (Tray-Klick):** Ein Klick auf das Tray-Icon öffnet ein kompaktes, schmales Fenster (Mobilansicht) direkt an der Position der Taskleiste. Perfekt, um Aufgaben blitzschnell einzusehen oder neue einzutragen. Die linke Seitenleiste ist in dieser Ansicht standardmäßig eingeklappt.
+- ❌ **Minimieren in den Tray:** Das Schließen des Fensters über das klassische `X` beendet die App nicht, sondern minimiert sie unsichtbar in die Taskleiste.
+- 🔄 **Auto-Updater:** Die App prüft beim Start im Hintergrund automatisch nach neuen Versionen und aktualisiert sich selbstständig.
+
+Du kannst die fertig kompilierten Versionen direkt aus dem Repository herunterladen:
 
 *   💾 **[Windows-Installer (Setup) herunterladen](./dist-desktop/TodoTxt-Windows-Setup.exe)** – Installiert die App auf deinem System und erstellt Verknüpfungen im Startmenü sowie auf dem Desktop.
 *   🚀 **[Portable EXE herunterladen](./dist-desktop/TodoTxt-Windows-Portable.exe)** – Eine eigenständige `.exe`-Datei, die direkt ohne Installation gestartet werden kann.
-*   📦 **[Portable ZIP herunterladen](./dist-desktop/TodoTxt-Windows-Portable.zip)** – Die portable Version als ZIP-Archiv verpackt.
+*   📦 **[Portable ZIP herunterladen](./dist-desktop/TodoTxt-Windows-Portable.zip)** – Die portable Version als ZIP-Archiv verpackt (bereinigt und platzsparend).
 
 Um die Desktop-Version lokal selbst zu kompilieren:
 ```bash
@@ -60,6 +72,7 @@ npm run electron:exe
 # Erstellt das installierbare Windows-Setup (Installer)
 npm run electron:installer
 ```
+
 
 ---
 
