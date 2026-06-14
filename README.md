@@ -2,6 +2,8 @@
 
 Eine elegante, moderne und serverlose WebApp zur Verwaltung von Aufgaben im standardmäßigen `todo.txt`-Format. Diese App läuft vollständig im Browser und synchronisiert deine Aufgaben direkt mit verschiedenen Cloud-Speichern.
 
+🌐 **Direkt im Browser nutzen (Web-App):** [https://lipponer.de/2do/](https://lipponer.de/2do/)
+
 ## Features
 
 - 📑 **Klassisches todo.txt Format:** Volle Kompatibilität mit dem Standard.
