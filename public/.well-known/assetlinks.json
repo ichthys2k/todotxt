@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "de.lipponer.www.twa",
+      "sha256_cert_fingerprints": [
+        "15:72:4F:1F:00:66:87:FE:7A:37:89:C1:C0:9F:18:36:FB:E1:69:51:FF:86:95:26:EF:17:0C:BB:B6:64:E0:07",
+        "63:02:5B:CA:94:89:A1:EB:E5:F9:AE:62:D6:80:E4:2E:B1:99:30:C0:41:5B:54:65:54:42:3F:61:AE:4C:13:EB"
+      ]
+    }
+  }
+]

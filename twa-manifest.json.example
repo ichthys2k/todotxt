@@ -1,0 +1,60 @@
+{
+  "packageId": "your.package.id.twa",
+  "host": "yourdomain.com",
+  "name": "Todo.txt WebApp",
+  "launcherName": "TodoApp",
+  "display": "standalone",
+  "themeColor": "#0F172A",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#0F172A",
+  "enableNotifications": true,
+  "startUrl": "/2do/",
+  "iconUrl": "https://yourdomain.com/2do/pwa-512x512.png",
+  "maskableIconUrl": "https://yourdomain.com/2do/pwa-512x512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "1.1.0",
+  "appVersionCode": 3,
+  "shortcuts": [
+    {
+      "name": "Aufgaben",
+      "shortName": "Aufgaben",
+      "url": "https://yourdomain.com/2do/",
+      "chosenIconUrl": "https://yourdomain.com/2do/pwa-192x192.png"
+    },
+    {
+      "name": "Dashboard",
+      "shortName": "Dashboard",
+      "url": "https://yourdomain.com/2do/?view=dashboard",
+      "chosenIconUrl": "https://yourdomain.com/2do/pwa-192x192.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://yourdomain.com/2do/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://yourdomain.com/2do/",
+  "minSdkVersion": 21,
+  "orientation": "default",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [],
+  "appVersion": "1.1.0"
+}

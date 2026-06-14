@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Datenschutzerklärung - Todo.txt WebApp</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --text: #e2e8f0;
+      --card-bg: #1e293b;
+      --primary: #6366f1;
+      --border: #334155;
+      --text-muted: #94a3b8;
+    }
+    
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f8fafc;
+        --text: #0f172a;
+        --card-bg: #ffffff;
+        --primary: #4f46e5;
+        --border: #e2e8f0;
+        --text-muted: #64748b;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: var(--card-bg);
+      padding: 40px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-top: 0;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 12px;
+      color: var(--text);
+    }
+
+    h2 {
+      font-size: 1.35rem;
+      margin-top: 32px;
+      color: var(--primary);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+    }
+
+    p, li {
+      color: var(--text);
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Datenschutzerklärung</h1>
+    <p>Diese Datenschutzerklärung informiert Sie über die Art, den Umfang und den Zweck der Verarbeitung von personenbezogenen Daten im Rahmen der Nutzung der <strong>Todo.txt WebApp</strong> (einschließlich der Android-App-Variante).</p>
+
+    <h2>1. Verantwortlicher</h2>
+    <p>
+      Cornelius Lipponer<br>
+      E-Mail: <a href="mailto:cornelius@lipponer.de">cornelius@lipponer.de</a><br>
+      Webseite: <a href="https://www.lipponer.de" target="_blank" rel="noopener noreferrer">www.lipponer.de</a>
+    </p>
+
+    <h2>2. Allgemeines zur Datenverarbeitung</h2>
+    <p>Die Todo.txt WebApp ist so konzipiert, dass Ihre Privatsphäre maximal geschützt bleibt. Es werden standardmäßig keine personenbezogenen Daten an Server des Betreibers übertragen, gespeichert oder dort ausgewertet.</p>
+
+    <h2>3. Arten der verarbeiteten Daten & Zwecke</h2>
+    
+    <h3>a) Lokaler Modus (LocalStorage)</h3>
+    <p>Wenn Sie die App im lokalen Modus nutzen, werden Ihre Aufgaben (Todo-Listen) ausschließlich lokal im Cache Ihres Webbrowsers bzw. auf Ihrem Mobilgerät (via LocalStorage) gespeichert. Diese Daten verlassen Ihr Gerät zu keinem Zeitpunkt.</p>
+
+    <h3>b) Microsoft OneDrive Synchronisation</h3>
+    <p>Wenn Sie sich über Ihren Microsoft-Account anmelden, um Ihre Aufgaben mit OneDrive zu synchronisieren, gelten folgende Bestimmungen:</p>
+    <ul>
+      <li>Die Anmeldung erfolgt direkt über die Server von Microsoft (Microsoft Entra ID / OAuth 2.0). Die App erhält zu keinem Zeitpunkt Zugriff auf Ihr Microsoft-Passwort.</li>
+      <li>Die App liest und schreibt ausschließlich Ihre <code>todo.txt</code> und <code>done.txt</code> Dateien in dem von Ihnen freigegebenen Verzeichnis auf Ihrem OneDrive.</li>
+      <li>Diese Datenübertragung erfolgt verschlüsselt (HTTPS) direkt zwischen Ihrem Browser/Mobilgerät und den Servern von Microsoft. Es findet keine Zwischenspeicherung oder Weitergabe an den Betreiber dieser App oder sonstige Dritte statt.</li>
+    </ul>
+
+    <h3>c) Server-Logfiles (Webspace-Hosting)</h3>
+    <p>Beim Aufrufen der Web-App erhebt der Hosting-Provider Strato automatisch Informationen, die Ihr Browser an den Server übermittelt (sogenannte Server-Logfiles). Dazu gehören:</p>
+    <ul>
+      <li>IP-Adresse des zugreifenden Geräts</li>
+      <li>Datum und Uhrzeit des Zugriffs</li>
+      <li>Name und URL der abgerufenen Datei</li>
+      <li>Übertragene Datenmenge</li>
+      <li>Verwendeter Browser und Betriebssystem</li>
+    </ul>
+    <p>Diese Daten sind technisch notwendig, um die Stabilität und Sicherheit der Webseite zu gewährleisten. Sie werden nicht mit anderen Datenquellen zusammengeführt.</p>
+
+    <h2>4. Rechte der betroffenen Person</h2>
+    <p>Sie haben das Recht:</p>
+    <ul>
+      <li>Auskunft über Ihre von uns verarbeiteten personenbezogenen Daten zu verlangen.</li>
+      <li>Die Berichtigung unrichtiger oder Vervollständigung Ihrer bei uns gespeicherten Daten zu verlangen.</li>
+      <li>Die Löschung Ihrer Daten zu verlangen (Da wir keine Daten auf unseren Servern speichern, können Sie Ihre lokalen App-Daten jederzeit selbst über die App-Einstellungen löschen).</li>
+      <li>Sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren.</li>
+    </ul>
+
+    <div class="footer">
+      Stand: Juni 2026 &bull; Erstellt für die Todo.txt WebApp unter <a href="https://www.lipponer.de/2do/">lipponer.de/2do/</a>
+    </div>
+  </div>
+</body>
+</html>
