@@ -79,10 +79,18 @@ export const TodoList = ({
   const [isOnboardingActive, setIsOnboardingActive] = useState(() => {
     return localStorage.getItem('todo_txt_onboarding_active') === 'true';
   });
+  const [isOnboardingSyntaxActive, setIsOnboardingSyntaxActive] = useState(() => {
+    return localStorage.getItem('todo_txt_onboarding_syntax_active') === 'true';
+  });
 
   const handleDismissOnboarding = () => {
     localStorage.removeItem('todo_txt_onboarding_active');
     setIsOnboardingActive(false);
+  };
+
+  const handleDismissOnboardingSyntax = () => {
+    localStorage.removeItem('todo_txt_onboarding_syntax_active');
+    setIsOnboardingSyntaxActive(false);
   };
 
   const handleSetupSync = () => {
@@ -91,18 +99,12 @@ export const TodoList = ({
     window.location.reload();
   };
 
-  const handleLoadSamples = () => {
-    if (!onAddTask) return;
-    onAddTask(t('sampleTask1', language));
-    onAddTask(t('sampleTask2', language));
-    onAddTask(t('sampleTask3', language));
-  };
 
   const renderOnboardingBanner = () => {
     if (!isOnboardingActive || tasks.length === 0) return null;
 
     return (
-      <div className="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-indigo-100/60 dark:from-indigo-950/30 dark:to-indigo-950/20 border border-indigo-105 dark:border-indigo-900/40 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-fade-in text-sm">
+      <div className="mt-6 p-4 bg-gradient-to-r from-indigo-50 to-indigo-100/60 dark:from-indigo-950/30 dark:to-indigo-950/20 border border-indigo-105 dark:border-indigo-900/40 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-fade-in text-sm">
         <div className="flex gap-3">
           <div className="p-2 bg-indigo-500/10 text-indigo-650 dark:text-indigo-400 rounded-xl flex-shrink-0 self-start">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 animate-pulse">
@@ -206,10 +208,10 @@ export const TodoList = ({
   };
 
   if (tasks.length === 0) {
-    if (isOnboardingActive) {
+    if (isOnboardingSyntaxActive) {
       return (
         <OnboardingGuide 
-          onLoadSamples={handleLoadSamples}
+          onDismiss={handleDismissOnboardingSyntax}
           language={language}
         />
       );
@@ -278,7 +280,11 @@ export const TodoList = ({
   if (groupBy === 'none') {
     return (
       <div className="flex flex-col">
-        {renderOnboardingBanner()}
+        {isOnboardingSyntaxActive && (
+          <div className="mb-6 border-b border-slate-200 dark:border-slate-800 pb-6">
+            <OnboardingGuide onDismiss={handleDismissOnboardingSyntax} language={language} />
+          </div>
+        )}
         {sortedTasks.map(task => (
           <TodoItem 
             key={task.id} 
@@ -300,6 +306,7 @@ export const TodoList = ({
             language={language}
           />
         ))}
+        {renderOnboardingBanner()}
       </div>
     );
   }  // Gruppierungs-Logik
@@ -475,7 +482,11 @@ export const TodoList = ({
 
   return (
     <div className="flex flex-col" style={{ gap: 'var(--density-list-space-y)' }}>
-      {renderOnboardingBanner()}
+      {isOnboardingSyntaxActive && (
+        <div className="mb-6 border-b border-slate-200 dark:border-slate-800 pb-6">
+          <OnboardingGuide onDismiss={handleDismissOnboardingSyntax} language={language} />
+        </div>
+      )}
       {groups.map(group => (
         <div key={group.title} className="flex flex-col" style={{ gap: 'var(--density-group-space-y)' }}>
           <div className="flex items-center gap-2">
@@ -565,6 +576,7 @@ export const TodoList = ({
           </div>
         </div>
       ))}
+      {renderOnboardingBanner()}
     </div>
   );
 };

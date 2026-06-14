@@ -225,7 +225,7 @@ export const translations = {
     onboardingBannerText: 'Deine Aufgaben werden aktuell nur im Browser gespeichert. Melde dich an, um deine Aufgaben sicher in der Cloud zu speichern und auf allen Geräten zu synchronisieren.',
     onboardingBannerSetup: 'Cloud-Sync einrichten',
     onboardingBannerDismiss: 'Ausblenden',
-    sampleTask1: '(A) Willkommen in der App! Erledige diese Aufgabe durch Klicken auf den Kreis',
+    sampleTask1: '(A) Willkommen in der App! Erledige diese Aufgabe durch Klicken auf das Kästchen links',
     sampleTask2: 'Aufgaben strukturieren mit +Projekten und @Kontexten',
     sampleTask3: 'Füge ein Fälligkeitsdatum hinzu wie due:2026-06-30'
   },

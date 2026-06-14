@@ -47,12 +47,14 @@ export const helpTranslations: Record<Language, HelpContent> = {
       { title: 'Wiederholung', example: 'rec:1d, rec:+1w', desc: 'Automatische Erstellung einer Folgeaufgabe (d: Tage, w: Wochen, m: Monate).' },
       { title: 'Zuständigkeit', example: 'who:name', desc: 'Ordnet die Aufgabe einer Person zu (z.B. who:cornelius).' }
     ],
-    syncTitle: 'Wie funktioniert die Synchronisation?',
-    syncIntroduction: 'Die App kann deine Aufgabenliste direkt in deiner Microsoft OneDrive Cloud speichern. So bleibt deine todo.txt-Datei auf all deinen Geräten synchron.',
+    syncTitle: 'Welche Synchronisations-Optionen gibt es?',
+    syncIntroduction: 'Die App unterstützt verschiedene Methoden, um deine todo.txt-Datei zu speichern und auf all deinen Geräten auf demselben Stand zu halten:',
     steps: [
-      { title: '1. OneDrive verbinden', desc: 'Melde dich mit deinem Microsoft-Konto an. Die Verbindung erfolgt sicher über OAuth2.' },
-      { title: '2. Datei auswählen', desc: 'Wähle eine vorhandene todo.txt-Datei aus oder erstelle eine neue direkt in deinem OneDrive.' },
-      { title: '3. Automatische Speicherung', desc: 'Jede Änderung wird sofort in die Cloud übertragen. Bei Offline-Nutzung wird synchronisiert, sobald du wieder online bist.' }
+      { title: 'Cloud-Speicher (OneDrive / Google Drive)', desc: 'Sichere Verbindung via OAuth2. Deine Aufgaben werden automatisch im Hintergrund mit deiner Cloud synchronisiert.' },
+      { title: 'Eigener Server (WebDAV)', desc: 'Verbinde Nextcloud, ownCloud oder andere WebDAV-Dienste über Server-URL und Zugangsdaten für maximale Datensouveränität.' },
+      { title: 'Git-Repositories (GitHub / GitLab / etc.)', desc: 'Synchronisiere deine todo.txt direkt mit einem Git-Repo unter Verwendung von HTTPS-URLs und Personal Access Tokens.' },
+      { title: 'Lokales Dateisystem (File System Access API)', desc: 'Verknüpfe eine echte lokale Textdatei auf deiner Festplatte. Änderungen in der App werden sofort in die Datei geschrieben.' },
+      { title: 'Browser-Speicher (Standard)', desc: 'Startet ohne Setup direkt im lokalen Browser-Speicher. Deine Daten können jederzeit importiert/exportiert oder verknüpft werden.' }
     ],
     hotkeysTitle: 'Tastatur-Kurzbefehle',
     hotkeyList: [
@@ -83,12 +85,14 @@ export const helpTranslations: Record<Language, HelpContent> = {
       { title: 'Recurrence', example: 'rec:1d, rec:+1w', desc: 'Automatically recreates tasks upon completion (d: days, w: weeks, m: months).' },
       { title: 'Assignee', example: 'who:name', desc: 'Assigns the task to a person (e.g., who:cornelius).' }
     ],
-    syncTitle: 'How does the synchronization work?',
-    syncIntroduction: 'The app can store your task list directly in your Microsoft OneDrive cloud. This keeps your todo.txt file synchronized across all your devices.',
+    syncTitle: 'What synchronization options are available?',
+    syncIntroduction: 'The app supports several methods to save and keep your todo.txt file synchronized across all your devices:',
     steps: [
-      { title: '1. Connect OneDrive', desc: 'Log in with your Microsoft account. The connection is secure via OAuth2.' },
-      { title: '2. Select File', desc: 'Choose an existing todo.txt file or create a new one directly in your OneDrive.' },
-      { title: '3. Auto Save', desc: 'Every change is immediately uploaded. If offline, changes sync as soon as you reconnect.' }
+      { title: 'Cloud Storage (OneDrive / Google Drive)', desc: 'Secure connection via OAuth2. Your tasks are automatically synchronized with your cloud in the background.' },
+      { title: 'Personal Server (WebDAV)', desc: 'Connect to Nextcloud, ownCloud, or other WebDAV services using the server URL and credentials for maximum data sovereignty.' },
+      { title: 'Git Repositories (GitHub / GitLab / etc.)', desc: 'Sync your todo.txt directly with a Git repository using HTTPS URLs and Personal Access Tokens.' },
+      { title: 'Local File System (File System Access API)', desc: 'Link a local text file on your drive. Changes in the app are written directly to your file.' },
+      { title: 'Browser Storage (Default)', desc: 'Starts instantly with zero setup using local browser storage. You can import/export or link a provider at any time.' }
     ],
     hotkeysTitle: 'Keyboard Shortcuts',
     hotkeyList: [
@@ -119,12 +123,14 @@ export const helpTranslations: Record<Language, HelpContent> = {
       { title: 'Repetitio', example: 'rec:1d, rec:+1w', desc: 'Rursus creat pensum confectum (d: dies, w: septimanae, m: menses).' },
       { title: 'Curator', example: 'who:nomen', desc: 'Pensum alicui personae attribuit (e.g. who:cornelius).' }
     ],
-    syncTitle: 'Quomodo synchronizatio operatur?',
-    syncIntroduction: 'Haec applicatio catalogum pensorum tuorum in Microsoft OneDrive nube servare potest. Ita scrinium todo.txt in omnibus machinis tuis synchronum manet.',
+    syncTitle: 'Quae sunt optiones synchronizationis?',
+    syncIntroduction: 'Haec applicatio varias rationes adhibet ut catalogus pensorum tuorum servetur et in omnibus machinis synchronus maneat:',
     steps: [
-      { title: '1. Iungere OneDrive', desc: 'Inscribe nomen per Microsoft rationem. Connexio secura per OAuth2 fit.' },
-      { title: '2. Eligere Scrinium', desc: 'Elige scrinium todo.txt existens aut crea novum in OneDrive tuo.' },
-      { title: '3. Automatica Conservatio', desc: 'Omnis mutatio statim in nubem mittitur. Si es sine linea, synchronizabitur cum redieris.' }
+      { title: 'Nubes (OneDrive / Google Drive)', desc: 'Connexio secura per OAuth2. Pensa tua automatice in posteriore parte synchronizantur.' },
+      { title: 'Proprius Server (WebDAV)', desc: 'Iunge Nextcloud, ownCloud aut alios WebDAV cum URL et indicio ad plenam datorum potestatem.' },
+      { title: 'Git (GitHub / GitLab / etc.)', desc: 'Synchroniza todo.txt cum repositorio Git per HTTPS URL et Personal Access Tokens.' },
+      { title: 'Scrinium Locale (File System API)', desc: 'Iunge verum scrinium in computatro tuo. Mutationes statim in illo scribuntur.' },
+      { title: 'Memoria Navigatoris (Defalta)', desc: 'Incipit sine ulla dispositione in memoria navigatoris. Potes exportare aut iungere quandocumque vis.' }
     ],
     hotkeysTitle: 'Brevia Claviaturae',
     hotkeyList: [
@@ -155,12 +161,14 @@ export const helpTranslations: Record<Language, HelpContent> = {
       { title: 'Récurrence', example: 'rec:1d, rec:+1w', desc: 'Création automatique d\'une tâche répétitive (d : jours, w : semaines, m : mois).' },
       { title: 'Responsable', example: 'who:nom', desc: 'Assigne la tâche à une personne spécifique (ex. who:cornelius).' }
     ],
-    syncTitle: 'Comment fonctionne la synchronisation ?',
-    syncIntroduction: 'L\'application peut stocker votre liste de tâches directement sur votre espace cloud Microsoft OneDrive, ce qui permet de garder votre fichier todo.txt synchronisé sur tous vos appareils.',
+    syncTitle: 'Quelles sont les options de synchronisation disponibles ?',
+    syncIntroduction: 'L\'application prend en charge plusieurs méthodes pour sauvegarder et synchroniser votre fichier todo.txt sur tous vos appareils :',
     steps: [
-      { title: '1. Connecter OneDrive', desc: 'Connectez-vous avec votre compte Microsoft. La connexion est sécurisée via OAuth2.' },
-      { title: '2. Choisir le fichier', desc: 'Sélectionnez un fichier todo.txt existant ou créez-en un nouveau directement sur votre OneDrive.' },
-      { title: '3. Sauvegarde automatique', desc: 'Chaque modification est immédiatement synchronisée. En mode hors ligne, la sync s\'effectue dès le retour d\'une connexion.' }
+      { title: 'Stockage Cloud (OneDrive / Google Drive)', desc: 'Connexion sécurisée via OAuth2. Vos tâches sont synchronisées automatiquement en arrière-plan.' },
+      { title: 'Serveur Personnel (WebDAV)', desc: 'Connectez Nextcloud, ownCloud ou d\'autres services WebDAV avec l\'URL et vos identifiants pour un contrôle total de vos données.' },
+      { title: 'Dépôts Git (GitHub / GitLab / etc.)', desc: 'Synchronisez votre tout.txt directement avec un dépôt Git via HTTPS et un jeton d\'accès personnel (PAT).' },
+      { title: 'Système de Fichiers Local (File System API)', desc: 'Associez un fichier texte local sur votre disque. Les modifications sont écrites instantanément dans le fichier.' },
+      { title: 'Stockage Navigateur (Par défaut)', desc: 'Démarre immédiatement sans configuration dans le stockage local du navigateur. Vous pouvez exporter ou associer un service à tout moment.' }
     ],
     hotkeysTitle: 'Raccourcis Clavier',
     hotkeyList: [
@@ -191,12 +199,14 @@ export const helpTranslations: Record<Language, HelpContent> = {
       { title: 'Ricorrenza', example: 'rec:1d, rec:+1w', desc: 'Ricrea automaticamente il compito al completamento (d: giorni, w: settimane, m: mesi).' },
       { title: 'Assegnatario', example: 'who:nome', desc: 'Assegna il compito a una persona (es. who:cornelius).' }
     ],
-    syncTitle: 'Come funziona la sincronizzazione?',
-    syncIntroduction: 'L\'applicazione può salvare la tua lista di compiti direttamente sul tuo cloud Microsoft OneDrive, mantenendo il file todo.txt sincronizzato su tutti i dispositivi.',
+    syncTitle: 'Quali opzioni di sincronizzazione sono disponibili?',
+    syncIntroduction: 'L\'app supporta diversi metodi per salvare e mantenere il tuo file todo.txt sincronizzato su tutti i tuoi dispositivi:',
     steps: [
-      { title: '1. Connetti OneDrive', desc: 'Accedi con il tuo account Microsoft. La connessione è protetta tramite OAuth2.' },
-      { title: '2. Seleziona File', desc: 'Scegli un file todo.txt esistente o creane uno nuovo direttamente su OneDrive.' },
-      { title: '3. Salvataggio Automatico', desc: 'Ogni modifica viene caricata istantaneamente. Se offline, si sincronizzerà appena torni online.' }
+      { title: 'Cloud Storage (OneDrive / Google Drive)', desc: 'Connessione sicura tramite OAuth2. I tuoi compiti vengono sincronizzati in background automaticamente.' },
+      { title: 'Server Personale (WebDAV)', desc: 'Collega Nextcloud, ownCloud o altri servizi WebDAV tramite URL e credenziali per il massimo controllo dei tuoi dati.' },
+      { title: 'Repository Git (GitHub / GitLab / ecc.)', desc: 'Sincronizza il tuo todo.txt direttamente con un repository Git usando URL HTTPS e Token di Accesso Personale.' },
+      { title: 'File System Locale (File System API)', desc: 'Collega un file di testo locale sul tuo disco. Le modifiche vengono scritte istantaneamente nel file.' },
+      { title: 'Memoria del Browser (Predefinita)', desc: 'Avvio immediato senza configurazione nella memoria locale del browser. Puoi esportare o collegare un provider in qualsiasi momento.' }
     ],
     hotkeysTitle: 'Scorciatoie da Tastiera',
     hotkeyList: [
@@ -227,12 +237,14 @@ export const helpTranslations: Record<Language, HelpContent> = {
       { title: 'Recurrencia', example: 'rec:1d, rec:+1w', desc: 'Vuelve a crear la tarea automáticamente al completarla (d: días, w: semanas, m: meses).' },
       { title: 'Asignado', example: 'who:nombre', desc: 'Asigna la tarea a una persona específica (ej. who:cornelius).' }
     ],
-    syncTitle: '¿Cómo funciona la sincronización?',
-    syncIntroduction: 'La aplicación puede guardar tu lista de tareas directamente en tu cuenta de Microsoft OneDrive. De esta forma, tu archivo todo.txt permanece sincronizado en todos tus dispositivos.',
+    syncTitle: '¿Qué opciones de sincronización hay disponibles?',
+    syncIntroduction: 'La aplicación admite varios métodos para guardar y mantener tu archivo todo.txt sincronizado en todos tus dispositivos:',
     steps: [
-      { title: '1. Conectar OneDrive', desc: 'Inicia sesión con tu cuenta de Microsoft. La conexión es segura mediante OAuth2.' },
-      { title: '2. Seleccionar archivo', desc: 'Elige un archivo todo.txt existente o crea uno nuevo en tu cuenta de OneDrive.' },
-      { title: '3. Guardado automático', desc: 'Cualquier cambio se sube inmediatamente. Si estás sin conexión, se sincronizará cuando vuelvas a conectarte.' }
+      { title: 'Almacenamiento en la Nube (OneDrive / Google Drive)', desc: 'Conexión segura mediante OAuth2. Tus tareas se sincronizan automáticamente en segundo plano.' },
+      { title: 'Servidor Personal (WebDAV)', desc: 'Conecta Nextcloud, ownCloud u otros servicios WebDAV con la URL y credenciales para un control total de tus datos.' },
+      { title: 'Repositorios Git (GitHub / GitLab / etc.)', desc: 'Sincroniza tu todo.txt directamente con un repositorio Git usando URLs HTTPS y Tokens de Acceso Personal.' },
+      { title: 'Sistema de Archivos Local (File System API)', desc: 'Vincula un archivo de texto local en tu disco. Los cambios se escriben instantáneamente en el archivo.' },
+      { title: 'Almacenamiento del Navegador (Por defecto)', desc: 'Inicia al instante sin configuración en el almacenamiento del navegador. Puedes exportar o vincular un proveedor en cualquier momento.' }
     ],
     hotkeysTitle: 'Atajos de Teclado',
     hotkeyList: [
@@ -263,12 +275,14 @@ export const helpTranslations: Record<Language, HelpContent> = {
       { title: '重复周期', example: 'rec:1d, rec:+1w', desc: '在任务完成后自动生成后续任务（d: 天，w: 周，m: 月）。' },
       { title: '指派人', example: 'who:name', desc: '把任务指派给特定的人（例如 who:cornelius）。' }
     ],
-    syncTitle: '云端同步如何工作？',
-    syncIntroduction: '本应用可以将您的任务列表文件直接保存在 Microsoft OneDrive 云盘中。由此可以保持您的 todo.txt 文件在所有设备上实时同步。',
+    syncTitle: '有哪些可用的同步选项？',
+    syncIntroduction: '本应用支持多种方式保存和同步您的 todo.txt 文件，确保所有设备上的数据一致：',
     steps: [
-      { title: '1. 连接 OneDrive', desc: '使用您的 Microsoft 账户登录。通过安全的 OAuth2 协议连接。' },
-      { title: '2. 选择文件', desc: '从您的 OneDrive 中选择一个已有的 todo.txt 文件，或者直接在云端新建一个。' },
-      { title: '3. 自动保存', desc: '每一次修改都会立即同步到云盘。如果离线，重新连网后更改会自动同步。' }
+      { title: '云端存储 (OneDrive / Google Drive)', desc: '通过 OAuth2 安全连接。您的任务将在后台自动与云端同步。' },
+      { title: '个人服务器 (WebDAV)', desc: '使用服务器 URL 和凭据连接 Nextcloud、ownCloud 或其他 WebDAV 服务，保障数据主权。' },
+      { title: 'Git 仓库 (GitHub / GitLab 等)', desc: '使用 HTTPS URL 和个人访问令牌 (PAT) 直接将 todo.txt 同步到 Git 仓库。' },
+      { title: '本地文件系统 (File System API)', desc: '关联您磁盘上的本地文本文件。应用中的更改将即时写入该文件。' },
+      { title: '浏览器存储 (默认)', desc: '无需任何设置即可在浏览器本地存储中启动。您可以随时导入、导出或关联上述云同步服务。' }
     ],
     hotkeysTitle: '键盘快捷键列表',
     hotkeyList: [
@@ -299,12 +313,14 @@ export const helpTranslations: Record<Language, HelpContent> = {
       { title: 'التكرار', example: 'rec:1d, rec:+1w', desc: 'إعادة إنشاء المهمة تلقائياً عند إكمالها (d: أيام، w: أسابيع، m: شهور).' },
       { title: 'المسؤول', example: 'who:name', desc: 'يسند المهمة لشخص معين (مثل who:cornelius).' }
     ],
-    syncTitle: 'كيف تعمل المزامنة؟',
-    syncIntroduction: 'يمكن للتطبيق حفظ قائمة مهامك مباشرة في حسابك على Microsoft OneDrive. يتيح ذلك إبقاء ملف todo.txt متزامناً عبر جميع أجهزتك.',
+    syncTitle: 'ما هي خيارات المزامنة المتاحة؟',
+    syncIntroduction: 'يدعم التطبيق عدة طرق لحفظ ملف todo.txt الخاص بك وإبقائه متزامنًا عبر جميع أجهزتك:',
     steps: [
-      { title: '1. ربط OneDrive', desc: 'قم بتسجيل الدخول باستخدام حساب مايكروسوفت الخاص بك. يتم الاتصال بأمان عبر OAuth2.' },
-      { title: '2. اختيار الملف', desc: 'اختر ملف todo.txt موجود مسبقاً أو أنشئ ملفاً جديداً مباشرة في OneDrive الخاص بك.' },
-      { title: '3. الحفظ التلقائي', desc: 'يتم رفع أي تغيير على الفور. إذا كنت غير متصل بالإنترنت، فستتم المزامنة بمجرد استعادة الاتصال.' }
+      { title: 'التخزين السحابي (OneDrive / Google Drive)', desc: 'اتصال آمن عبر OAuth2. تتم مزامنة مهامك تلقائيًا في الخلفية مع السحابة.' },
+      { title: 'خادم شخصي (WebDAV)', desc: 'قم بربط Nextcloud أو ownCloud أو خدمات WebDAV الأخرى باستخدام عنوان الخادم وبيانات الاعتماد للتحكم الكامل ببياناتك.' },
+      { title: 'مستودعات Git (GitHub / GitLab / إلخ)', desc: 'قم بمزامنة ملف todo.txt مباشرة مع مستودع Git باستخدام عناوين HTTPS ورموز الوصول الشخصية (PAT).' },
+      { title: 'نظام الملفات المحلي (File System API)', desc: 'اربط ملف نصي محلي على قرصك. تُكتب التغييرات في التطبيق مباشرة إلى الملف فوراً.' },
+      { title: 'تخزين المتصفح (افتراضي)', desc: 'يبدأ العمل فوراً بدون إعدادات عبر التخزين المحلي للمتصفح. يمكنك تصدير بياناتك أو ربطها بموفر خدمة في أي وقت.' }
     ],
     hotkeysTitle: 'اختصارات لوحة المفاتيح',
     hotkeyList: [
@@ -336,11 +352,13 @@ export const helpTranslations: Record<Language, HelpContent> = {
       { title: 'सौंपा गया व्यक्ति', example: 'who:name', desc: 'कार्य को किसी व्यक्ति को सौंपता है (जैसे, who:cornelius)।' }
     ],
     syncTitle: 'सिंक्रनाइज़ेशन कैसे काम करता है?',
-    syncIntroduction: 'ऐप आपकी कार्य सूची को सीधे आपके Microsoft OneDrive क्लाउड में सहेज सकता है। इससे आपकी todo.txt फ़ाइल आपके सभी उपकरणों पर सिंक रहती है।',
+    syncIntroduction: 'ऐप आपकी todo.txt फ़ाइल को सुरक्षित करने और आपके सभी उपकरणों पर सिंक रखने के लिए कई तरीकों का समर्थन करता है:',
     steps: [
-      { title: '1. OneDrive कनेक्ट करें', desc: 'अपने Microsoft खाते से लॉग इन करें। कनेक्शन OAuth2 के माध्यम से सुरक्षित है।' },
-      { title: '2. फ़ाइल चुनें', desc: 'एक मौजूदा todo.txt फ़ाइल चुनें या अपने OneDrive में सीधे एक नई फ़ाइल बनाएं।' },
-      { title: '3. ऑटो सेव', desc: 'हर बदलाव तुरंत अपलोड हो जाता है। ऑफ़लाइन होने पर, ऑनलाइन आते ही बदलाव सिंक हो जाते हैं।' }
+      { title: 'क्लाउड स्टोरेज (OneDrive / Google Drive)', desc: 'OAuth2 के माध्यम से सुरक्षित कनेक्शन। आपके कार्य स्वचालित रूप से बैकग्राउंड में आपके क्लाउड से सिंक हो जाते हैं।' },
+      { title: 'व्यक्तिगत सर्वर (WebDAV)', desc: 'अपने डेटा पर पूर्ण नियंत्रण के लिए सर्वर URL और क्रेडेंशियल का उपयोग करके Nextcloud, ownCloud या अन्य WebDAV सेवाओं को कनेक्ट करें।' },
+      { title: 'Git रिपॉजिटरी (GitHub / GitLab / आदि)', desc: 'HTTPS URL और पर्सनल एक्सेस टोकन का उपयोग करके अपनी todo.txt को सीधे Git रिपॉजिटरी से सिंक करें।' },
+      { title: 'स्थानीय फ़ाइल सिस्टम (File System API)', desc: 'अपने डिस्क पर एक वास्तविक स्थानीय टेक्स्ट फ़ाइल को लिंक करें। ऐप में किए गए बदलाव तुरंत फ़ाइल में लिखे जाते हैं।' },
+      { title: 'ब्राउज़र स्टोरेज (डिफ़ॉल्ट)', desc: 'स्थानीय ब्राउज़र स्टोरेज में बिना किसी सेटअप के तुरंत शुरू होता है। आप किसी भी समय डेटा निर्यात या किसी प्रदाता से लिंक कर सकते हैं।' }
     ],
     hotkeysTitle: 'कीबोर्ड शॉर्टकट',
     hotkeyList: [
@@ -372,11 +390,13 @@ export const helpTranslations: Record<Language, HelpContent> = {
       { title: 'Responsável', example: 'who:nome', desc: 'Atribui a tarefa a uma pessoa (ex. who:cornelius).' }
     ],
     syncTitle: 'Como funciona a sincronização?',
-    syncIntroduction: 'A aplicação pode armazenar a sua lista de tarefas diretamente na sua conta do Microsoft OneDrive. Isso mantém o seu arquivo todo.txt sincronizado em todos os seus aparelhos.',
+    syncIntroduction: 'O aplicativo suporta vários métodos para salvar e manter o seu arquivo todo.txt sincronizado em todos os seus dispositivos:',
     steps: [
-      { title: '1. Conectar OneDrive', desc: 'Faça login com a sua conta da Microsoft. A conexão é segura via OAuth2.' },
-      { title: '2. Selecionar Arquivo', desc: 'Escolha um arquivo todo.txt existente ou crie um novo diretamente no seu OneDrive.' },
-      { title: '3. Salvamento Automático', desc: 'Qualquer alteração é imediatamente enviada. Se offline, a sincronização ocorre assim que retornar a conexão.' }
+      { title: 'Armazenamento em Nuvem (OneDrive / Google Drive)', desc: 'Conexão segura via OAuth2. Suas tarefas são sincronizadas automaticamente em segundo plano.' },
+      { title: 'Servidor Pessoal (WebDAV)', desc: 'Conecte ao Nextcloud, ownCloud ou outros serviços WebDAV com a URL e credenciais para controle total dos seus dados.' },
+      { title: 'Repositórios Git (GitHub / GitLab / etc.)', desc: 'Sincronize seu todo.txt diretamente com um repositório Git usando URLs HTTPS e Tokens de Acesso Pessoal.' },
+      { title: 'Sistema de Arquivos Local (File System API)', desc: 'Vincule um arquivo de texto local no seu disco. As alterações são gravadas instantaneamente no arquivo.' },
+      { title: 'Armazenamento do Navegador (Padrão)', desc: 'Inicia instantaneamente sem configuração no armazenamento local do navegador. Você pode exportar ou vincular a qualquer momento.' }
     ],
     hotkeysTitle: 'Atalhos do Teclado',
     hotkeyList: [
@@ -407,12 +427,14 @@ export const helpTranslations: Record<Language, HelpContent> = {
       { title: 'Wiederholung', example: 'rec:1d, rec:+1w', desc: 'Erstellt glei a neue Uffgab (d: Däg, w: Woche, m: Monate) wenn d\'alte erledigt isch.' },
       { title: 'Zuständigkeit', example: 'who:nomen', desc: 'Trägt ei, wer die Uffgab macha soll (z. B. who:cornelius).' }
     ],
-    syncTitle: 'Wie klappt des mit der Cloud?',
-    syncIntroduction: 'D\'App ka dei Lischd direkt in dei Microsoft OneDrive Cloud speichera. So bleibt dei todo.txt auf all deine Apparate auf em gleicha Stand.',
+    syncTitle: 'Was gibt\'s für Sync-Optiona?',
+    syncIntroduction: 'D\'App kann dei todo.txt auf verschiedene Weaga speichera, damit dei Zeug auf all deine Apparate gleich bleibt:',
     steps: [
-      { title: '1. OneDrive vrbinda', desc: 'Melde di mit dei\'m Microsoft-Konto a. Des isch sicher über OAuth2.' },
-      { title: '2. Datei aussuacha', desc: 'Nimm a todo.txt wo scho da isch oder mach a neue direkt im OneDrive.' },
-      { title: '3. Automatisches Speichera', desc: 'Jede Änderung rutscht sofort in d\'Cloud. Wenn offline bisch, wird gsynct sobald wieder online bisch.' }
+      { title: 'Wolka-Speicher (OneDrive / Google Drive)', desc: 'Sichere Sach über OAuth2. Dei Kram wird automatisch em Hintergrund gsynct.' },
+      { title: 'Eigener Server (WebDAV)', desc: 'Häng dei Nextcloud oder ownCloud nei über URL und Login, damit dei Zeug bei dir bleibt.' },
+      { title: 'Git-Repositories (GitHub / GitLab / etc.)', desc: 'Schieb dei todo.txt direkt in a Git-Repository mit HTTPS-Link und Access Token.' },
+      { title: 'Lokale Datei (File System API)', desc: 'Verknüpf des direkt mit a echte Textdatei auf dei\'m Rechner. Jede Änderung steht sofort drin.' },
+      { title: 'Browser-Speicher (Standard)', desc: 'Fängt glei ohne Gschiss im Browser-Speicher a. Du kannst dei Zeug jederzeit exportiera oder verknüpfa.' }
     ],
     hotkeysTitle: 'Taschdadur-Tasten',
     hotkeyList: [
@@ -443,12 +465,14 @@ export const helpTranslations: Record<Language, HelpContent> = {
       { title: 'Повторення', example: 'rec:1d, rec:+1w', desc: 'Автоматично створює нове повторюване завдання після виконання (d: дні, w: тижні, m: місяці).' },
       { title: 'Виконавець', example: 'who:name', desc: 'Призначає завдання конкретній особі (напр., who:cornelius).' }
     ],
-    syncTitle: 'Як працює синхронізація?',
-    syncIntroduction: 'Додаток може зберігати ваш список завдань безпосередньо у хмарі Microsoft OneDrive. Це дозволяє синхронізувати файл todo.txt на всіх ваших пристроях.',
+    syncTitle: 'Які варіанти синхронізації доступні?',
+    syncIntroduction: 'Додаток підтримує кілька методів збереження та синхронізації файлу todo.txt між усіма вашими пристроями:',
     steps: [
-      { title: '1. Підключити OneDrive', desc: 'Увійдіть за допомогою свого облікового запису Microsoft. Підключення безпечне через OAuth2.' },
-      { title: '2. Вибрати файл', desc: 'Оберіть існуючий файл todo.txt або створіть новий безпосередньо у вашому OneDrive.' },
-      { title: '3. Автозбереження', desc: 'Будь-які зміни миттєво завантажуються в хмару. В офлайн-режимі синхронізація відбудеться, щойно з\'явиться інтернет.' }
+      { title: 'Хмарне сховище (OneDrive / Google Drive)', desc: 'Безпечне підключення через OAuth2. Ваші завдання автоматично синхронізуються з хмарою у фоновому режимі.' },
+      { title: 'Власний сервер (WebDAV)', desc: 'Підключіть Nextcloud, ownCloud або інші служби WebDAV за допомогою URL-адреси та облікових даних для повного контролю.' },
+      { title: 'Репозиторії Git (GitHub / GitLab / тощо)', desc: 'Синхронізуйте todo.txt безпосередньо з репозиторієм Git за допомогою HTTPS URL та персональних токенів доступу.' },
+      { title: 'Локальна файлова система (File System API)', desc: 'Зв\'яжіть локальний текстовий файл на диску. Зміни в додатку негайно записуються у файл.' },
+      { title: 'Локальне сховище браузера (Типово)', desc: 'Запуск без налаштування у локальному сховищі браузера. Ви можете експортувати дані або підключити провайдера в будь-я час.' }
     ],
     hotkeysTitle: 'Гарячі Клавіші',
     hotkeyList: [
@@ -479,12 +503,14 @@ export const helpTranslations: Record<Language, HelpContent> = {
       { title: 'מחזוריות', example: 'rec:1d, rec:+1w', desc: 'יוצר משימה חדשה באופן אוטומטי בעת השלמתה (d: ימים, w: שבועות, m: חודשים).' },
       { title: 'אחראי', example: 'who:name', desc: 'משייך את המשימה לאדם ספציפי (למשל: who:cornelius).' }
     ],
-    syncTitle: 'כיצד פועל הסנכרון?',
-    syncIntroduction: 'האפליקציה יכולה לשמור את רשימת המשימות שלך ישירות בחשבון ה-Microsoft OneDrive שלך. כך קובץ todo.txt נשאר מסונכרן בכל המכשירים שלך.',
+    syncTitle: 'אילו אפשרויות סנכרון זמינות?',
+    syncIntroduction: 'האפליקציה תומכת במספר שיטות לשמירה וסנכרון של קובץ todo.txt שלך בכל המכשירים שלך:',
     steps: [
-      { title: '1. חיבור ל-OneDrive', desc: 'התחבר עם חשבון המיקרוסופט שלך. החיבור מאובטח באמצעות פרוטוקול OAuth2.' },
-      { title: '2. בחירת קובץ', desc: 'בחר קובץ todo.txt קיים או צור קובץ חדש ישירות ב-OneDrive שלך.' },
-      { title: '3. שמירה אוטומטית', desc: 'כל שינוי מועלה מיד לענן. במצב לא מקוון, השינויים יסונכרנו ברגע שתחזור לרשת.' }
+      { title: 'אחסון בענן (OneDrive / Google Drive)', desc: 'חיבור מאובטח באמצעות OAuth2. המשימות שלך מסונכרנות אוטומטית ברקע עם הענן שלך.' },
+      { title: 'שרת אישי (WebDAV)', desc: 'חבר את Nextcloud, ownCloud או שירותי WebDAV אחרים באמצעות כתובת השרת ופרטי הגישה לשליطة מלאה בנתונים שלך.' },
+      { title: 'מאגרי Git (GitHub / GitLab וכדומה)', desc: 'סנכרן את קובץ todo.txt ישירות עם מאגר Git באמצעות כתובות HTTPS וסמלי גישה אישיים (Tokens).' },
+      { title: 'מערכת קבצים מקומית (File System API)', desc: 'קשר קובץ טקස් מקומי אמיתי בכונן שלך. שינויים באפליקציה נכתבים מיד לקובץ.' },
+      { title: 'אחסון דפדפן (ברירת מחדל)', desc: 'מתחיל מיד ללא הגדרה באחסון המקומי של הדפדפן. באפשרותך לייצא את הנתונים או לקשר ספק בכל עת.' }
     ],
     hotkeysTitle: 'קיצורי מקלדת',
     hotkeyList: [
@@ -515,12 +541,14 @@ export const helpTranslations: Record<Language, HelpContent> = {
       { title: 'Επανάληψη', example: 'rec:1d, rec:+1w', desc: 'Αυτόματη δημιουργία επαναλαμβανόμενης εργασίας κατά την ολοκλήρωση (d: ημέρες, w: εβδομάδες, m: μήνες).' },
       { title: 'Υπεύθυνος', example: 'who:name', desc: 'Αναθέτει την εργασία σε ένα άτομο (π.χ. who:cornelius).' }
     ],
-    syncTitle: 'Πώς λειτουργεί ο συγχρονισμός;',
-    syncIntroduction: 'Η εφαρμογή μπορεί να αποθηκεύσει τη λίστα εργασιών σας απευθείας στο Microsoft OneDrive cloud σας, διατηρώντας το αρχείο todo.txt συγχρονισμένο σε όλες τις συσκευές σας.',
+    syncTitle: 'Ποιες επιλογές συγχρονισμού είναι διαθέσιμες;',
+    syncIntroduction: 'Η εφαρμογή υποστηρίζει διάφορες μεθόδους για την αποθήκευση και τον συγχρονισμό του αρχείου todo.txt σε όλες τις συσκευές σας:',
     steps: [
-      { title: '1. Σύνδεση OneDrive', desc: 'Συνδεθείτε με τον λογαριασμό σας Microsoft. Η σύνδεση είναι ασφαλής μέσω OAuth2.' },
-      { title: '2. Επιλογή Αρχείου', desc: 'Επιλέξτε ένα υπάρχον αρχείο todo.txt ή δημιουργήστε ένα νέο απευθείας στο OneDrive σας.' },
-      { title: '3. Αυτόματη Αποθήκευση', desc: 'Κάθε αλλαγή μεταφορτώνεται αμέσως. Εάν είστε εκτός σύνδεσης, ο συγχρονισμός θα γίνει μόλις συνδεθείτε.' }
+      { title: 'Cloud Storage (OneDrive / Google Drive)', desc: 'Ασφαλής σύνδεση μέσω OAuth2. Οι εργασίες σας συγχρονίζονται αυτόματα στο παρασκήνιο.' },
+      { title: 'Προσωπικός διακομιστής (WebDAV)', desc: 'Συνδέστε Nextcloud, ownCloud ή άλλες υπηρεσίες WebDAV χρησιμοποιώντας τη διεύθυνση URL και τα διαπιστευτήρια για απόλυτο έλεγχο των δεδομένων σας.' },
+      { title: 'Αποθετήρια Git (GitHub / GitLab / κ.λπ.)', desc: 'Συγχρονίστε το todo.txt απευθείας με ένα αποθετήριο Git χρησιμοποιώντας διευθύνσεις URL HTTPS και προσωπικά διακριτικά πρόσβασης.' },
+      { title: 'Τοπικό σύστημα αρχείων (File System API)', desc: 'Συνδέστε ένα πραγματικό τοπικό αρχείο κειμένου στον δίσκο σας. Οι αλλαγές στην εφαρμογή εγγράφονται αμέσως στο αρχείο.' },
+      { title: 'Χώρος αποθήκευσης προγράμματος περιήγησης (Προεπιλογή)', desc: 'Ξεκινά αμέσως χωρίς ρυθμίσεις στον τοπικό χώρο αποθήκευσης. Μπορείτε να κάνετε εξαγωγή ή σύνδεση ανά πάσα στιγμή.' }
     ],
     hotkeysTitle: 'Συντομεύσεις Πληκτρολογίου',
     hotkeyList: [
@@ -551,12 +579,14 @@ export const helpTranslations: Record<Language, HelpContent> = {
       { title: 'Yineleme', example: 'rec:1d, rec:+1w', desc: 'Tamamlandığında görevi otomatik olarak yeniden oluşturur (d: gün, w: hafta, m: ay).' },
       { title: 'Sorumlu', example: 'who:name', desc: 'Görevi bir kişiye atar (ör. who:cornelius).' }
     ],
-    syncTitle: 'Eşitleme nasıl çalışır?',
-    syncIntroduction: 'Uygulama, görev listenizi doğrudan Microsoft OneDrive bulutunuzda saklayabilir. Bu, todo.txt dosyanızın tüm cihazlarınızda senkronize kalmasını sağlar.',
+    syncTitle: 'Hangi senkronizasyon seçenekleri mevcut?',
+    syncIntroduction: 'Uygulama, todo.txt dosyanızı kaydetmek ve tüm cihazlarınızda senkronize tutmak için birkaç yöntemi destekler:',
     steps: [
-      { title: '1. OneDrive Bağlantısı', desc: 'Microsoft hesabınızla oturum açın. Bağlantı OAuth2 aracılığıyla güvenli şekilde sağlanır.' },
-      { title: '2. Dosya Seçimi', desc: 'Mevcut bir todo.txt dosyasını seçin veya doğrudan OneDrive\'ınızda yeni bir tane oluşturun.' },
-      { title: '3. Otomatik Kaydetme', desc: 'Her değişiklik anında buluta yüklenir. Çevrimdışıysanız, tekrar bağlandığınızda değişiklikler senkronize edilir.' }
+      { title: 'Bulut Depolama (OneDrive / Google Drive)', desc: 'OAuth2 ile güvenli bağlantı. Görevleriniz arka planda bulutunuzla otomatik olarak eşitlenir.' },
+      { title: 'Kişisel Sunucu (WebDAV)', desc: 'Veri kontrolünü elinizde tutmak için sunucu URL\'si ve kimlik bilgilerini kullanarak Nextcloud, ownCloud veya diğer WebDAV servislerini bağlayın.' },
+      { title: 'Git Depoları (GitHub / GitLab / vb.)', desc: 'HTTPS URL\'leri ve Kişisel Erişim Belirteçleri (PAT) kullanarak todo.txt dosyanızı doğrudan bir Git deposuna eşitleyin.' },
+      { title: 'Yerel Dosya Sistemi (File System API)', desc: 'Diskinizdeki yerel bir metin dosyasını bağlayın. Uygulamadaki değişiklikler anında dosyaya yazılır.' },
+      { title: 'Tarayıcı Depolama Alanı (Varsayılan)', desc: 'Herhangi bir kurulum olmadan tarayıcının yerel hafızasında başlar. İstediğiniz zaman verileri dışa aktarabilir veya bir servise bağlayabilirsiniz.' }
     ],
     hotkeysTitle: 'Klavye Kısayolları',
     hotkeyList: [

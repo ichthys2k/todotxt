@@ -1,17 +1,21 @@
 import Client from 'ssh2-sftp-client';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Load environment variables from .env
+dotenv.config();
+
 const sftp = new Client();
 
 const config = {
-  host: '541931.ssh.w1.strato.hosting',
-  port: 22,
-  username: 'stu851261246',
-  password: 'dfdfDFDF11!!332'
+  host: process.env.SFTP_HOST,
+  port: parseInt(process.env.SFTP_PORT || '22', 10),
+  username: process.env.SFTP_USERNAME,
+  password: process.env.SFTP_PASSWORD
 };
 
 async function deploy() {

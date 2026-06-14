@@ -21,7 +21,38 @@ function App() {
     if (!lastMode) {
       localStorage.setItem('todo_txt_last_mode', 'local');
       localStorage.setItem('todo_txt_onboarding_active', 'true');
+      localStorage.setItem('todo_txt_onboarding_syntax_active', 'true');
       localStorage.setItem('todo_txt_local_setup_complete', 'true');
+
+      // Detect language for default tasks
+      const savedLang = localStorage.getItem('todo_txt_language');
+      let lang = 'de';
+      if (savedLang) {
+        lang = savedLang;
+      } else {
+        const browserLang = typeof navigator !== 'undefined' ? navigator.language.split('-')[0] : 'de';
+        if (['de', 'en'].includes(browserLang)) {
+          lang = browserLang;
+        } else {
+          lang = 'en';
+        }
+      }
+
+      const welcomeTasks = lang === 'de' ? [
+        "(A) Willkommen in der App! Erledige diese Aufgabe durch Klicken auf das Kästchen links",
+        "Aufgabe hinzufügen durch Eingabe im Textfeld der Kopfzeile",
+        "Aufgaben strukturieren mit +Projekten und @Kontexten",
+        "Aufgabe mit Priorität (B) und Fälligkeitsdatum ausprobieren",
+        "Detaillierte Anleitung ansehen mit dem '?' Symbol oben rechts"
+      ].join('\n') : [
+        "(A) Welcome to the app! Complete this task by clicking the checkbox on the left",
+        "Add a task by typing in the input field in the header",
+        "Structure tasks with +projects and @contexts",
+        "Task with priority (B) due:2026-06-25 try due dates",
+        "View detailed instructions using the '?' icon on the top right"
+      ].join('\n');
+
+      localStorage.setItem('todo_txt_local_content', welcomeTasks);
       return 'local';
     }
     return lastMode as any;
