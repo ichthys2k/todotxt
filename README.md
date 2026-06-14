@@ -82,7 +82,11 @@ Die App benötigt Umgebungsvariablen, um sich mit den jeweiligen APIs zu verbind
 
 ## Android App (TWA)
 
-Die App kann mit [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap) als Android-App verpackt werden.
+Die App kann als Android-App auf Mobilgeräten installiert werden. Die fertig signierte APK-Datei kannst du direkt hier herunterladen:
+
+*   📱 **[Android APK herunterladen](./TodoTxt-Android-Release.apk)** – Installiert die App auf deinem Android-Gerät.
+
+Für Entwickler: Die App kann mit [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap) verpackt werden.
 - Eine Vorlage für die Bubblewrap-Konfiguration findest du in `twa-manifest.json.example`.
 - Kopiere diese Datei zu `twa-manifest.json` und passe die Domain, Package ID sowie den Pfad zu deinem lokalen `keystore` an.
 - Die echte `twa-manifest.json` sowie deine `.keystore`-Dateien sind bereits in `.gitignore` eingetragen und werden nicht hochgeladen.
