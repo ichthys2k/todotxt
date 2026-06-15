@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Wox.Plugin")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("0.100.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+197cf3d68e121a62ff3d75f4af1620beb2ed5880")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+787e72ffa6ada56ceb2544ee3634f8c2163742d3")]
 [assembly: System.Reflection.AssemblyProductAttribute("Wox.Plugin")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Wox.Plugin")]
 [assembly: System.Reflection.AssemblyVersionAttribute("0.100.0.0")]

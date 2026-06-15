@@ -10,6 +10,8 @@ declare global {
       selectFile: (title: string) => Promise<string | null>;
       getPaths: () => Promise<{ todo: string | null; archive: string | null }>;
       setPaths: (todoPath: string | null, archivePath: string | null) => Promise<void>;
+      showMainWindow: () => Promise<void>;
+      closeWidgetWindow: () => Promise<void>;
     };
   }
 }

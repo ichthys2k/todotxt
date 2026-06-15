@@ -16,5 +16,8 @@
     <ProjectReference Include="Wox.Plugin.Stub\Wox.Plugin.Stub.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Wox.Plugin.Stub\**" />
+  </ItemGroup>
 
 </Project>

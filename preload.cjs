@@ -19,4 +19,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   /** Persist the todo.txt / archive.txt file paths to the app config. */
   setPaths: (todoPath, archivePath) => ipcRenderer.invoke('electron:setPaths', todoPath, archivePath),
+
+  /** Show and focus the main application window. */
+  showMainWindow: () => ipcRenderer.invoke('electron:showMainWindow'),
+
+  /** Close the desktop widget window. */
+  closeWidgetWindow: () => ipcRenderer.invoke('electron:closeWidgetWindow'),
 });

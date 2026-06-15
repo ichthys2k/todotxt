@@ -7,6 +7,7 @@ import { TodoApp } from './components/TodoApp';
 import { applyTheme } from './services/themeService';
 import { clearWebDavCredentials, clearGitCredentials } from './services/storageService';
 import { setGoogleDriveToken, clearGoogleDriveCredentials } from './services/providers/GoogleDriveSyncProvider';
+import { WidgetView } from './components/WidgetView';
 
 function App() {
   const { instance, accounts, inProgress } = useMsal();
@@ -119,6 +120,12 @@ function App() {
       setAvatarUrl(null);
     }
   }, [isAuthenticated, storageMode]);
+
+  const isWidget = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('view') === 'widget';
+
+  if (isWidget) {
+    return <WidgetView />;
+  }
 
   if (inProgress !== InteractionStatus.None) {
     return (

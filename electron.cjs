@@ -4,6 +4,7 @@ const fs = require('fs');
 const { autoUpdater } = require('electron-updater');
 
 let mainWindow;
+let widgetWindow = null;
 let tray = null;
 let isQuitting = false;
 
@@ -66,6 +67,19 @@ ipcMain.handle('electron:setPaths', async (_event, todoPath, archivePath) => {
   savePaths({ todo: todoPath, archive: archivePath });
 });
 
+ipcMain.handle('electron:showMainWindow', async () => {
+  if (mainWindow) {
+    mainWindow.show();
+    mainWindow.focus();
+  }
+});
+
+ipcMain.handle('electron:closeWidgetWindow', async () => {
+  if (widgetWindow) {
+    widgetWindow.close();
+  }
+});
+
 // ---------------------------------------------------------------------------
 // Window creation
 // ---------------------------------------------------------------------------
@@ -102,6 +116,73 @@ function createWindow() {
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+  });
+}
+
+function createWidgetWindow() {
+  if (widgetWindow) {
+    widgetWindow.focus();
+    return;
+  }
+
+  let widgetConfig = { x: undefined, y: undefined, width: 340, height: 480 };
+  const configPath = path.join(app.getPath('userData'), 'widget-config.json');
+  try {
+    if (fs.existsSync(configPath)) {
+      widgetConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    }
+  } catch (e) {
+    console.error('Failed to load widget-config.json', e);
+  }
+
+  widgetWindow = new BrowserWindow({
+    width: widgetConfig.width || 340,
+    height: widgetConfig.height || 480,
+    x: widgetConfig.x,
+    y: widgetConfig.y,
+    frame: false,
+    transparent: true,
+    resizable: true,
+    skipTaskbar: true,
+    alwaysOnBottom: false,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: false,
+      preload: path.join(__dirname, 'preload.cjs'),
+    },
+    icon: path.join(__dirname, 'public', 'icon.png'),
+    title: 'Todo.txt Widget',
+  });
+
+  const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+
+  if (isDev) {
+    widgetWindow.loadURL('http://localhost:5173/?view=widget');
+  } else {
+    widgetWindow.loadFile(path.join(__dirname, 'dist', 'index.html'), { query: { view: 'widget' } });
+  }
+
+  widgetWindow.on('move', () => {
+    const bounds = widgetWindow.getBounds();
+    try {
+      fs.writeFileSync(configPath, JSON.stringify({ x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height }, null, 2), 'utf8');
+    } catch (e) {
+      console.error('Failed to save widget position', e);
+    }
+  });
+
+  widgetWindow.on('resize', () => {
+    const bounds = widgetWindow.getBounds();
+    try {
+      fs.writeFileSync(configPath, JSON.stringify({ x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height }, null, 2), 'utf8');
+    } catch (e) {
+      console.error('Failed to save widget size', e);
+    }
+  });
+
+  widgetWindow.on('closed', () => {
+    widgetWindow = null;
   });
 }
 
@@ -165,6 +246,12 @@ function createTray() {
           createWindow();
         }
         showTrayWindow();
+      }
+    },
+    {
+      label: 'Desktop-Widget anzeigen',
+      click: () => {
+        createWidgetWindow();
       }
     },
     { type: 'separator' },
