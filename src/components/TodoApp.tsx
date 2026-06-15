@@ -382,6 +382,8 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
     const handleResize = () => {
       if (window.innerWidth < 768) {
         setIsSidebarOpen(false);
+      } else {
+        setIsSidebarOpen(true);
       }
     };
     window.addEventListener('resize', handleResize);
@@ -1204,7 +1206,45 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
         ? await fetchTodoContent(storageMode)
         : await fetchArchiveContent(storageMode);
       const parsedTasks = parseTodos(content);
-      setTasks(parsedTasks);
+      
+      let finalTasks = parsedTasks;
+      if (currentView === 'todo' && 'caches' in window) {
+        try {
+          const cache = await caches.open('todo-widget-data');
+          const cachedResponse = await cache.match('/widget-tasks.json');
+          if (cachedResponse) {
+            const cachedData = await cachedResponse.json();
+            const cachedTasks = cachedData.tasks || [];
+            
+            let hasChanges = false;
+            const completedIds = new Set(cachedTasks.filter((t: any) => t.isCompleted).map((t: any) => t.id));
+            
+            if (completedIds.size > 0) {
+              finalTasks = finalTasks.flatMap(t => {
+                if (completedIds.has(t.id) && !t.isCompleted) {
+                  hasChanges = true;
+                  return completeTask(t);
+                }
+                return t;
+              });
+            }
+
+            const newTasksFromCache = cachedTasks.filter((ct: any) => !ct.isCompleted && !finalTasks.some(ft => ft.id === ct.id || ft.originalText === ct.originalText));
+            if (newTasksFromCache.length > 0) {
+              hasChanges = true;
+              finalTasks = [...finalTasks, ...newTasksFromCache];
+            }
+
+            if (hasChanges) {
+              const contentToSave = serializeTodos(finalTasks);
+              await saveTodoContent(storageMode, contentToSave);
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to sync tasks with widget cache on startup', e);
+        }
+      }
+      setTasks(finalTasks);
 
       // System-Benachrichtigung Briefing
       if (currentView === 'todo' && notificationsEnabled && 'Notification' in window && Notification.permission === 'granted') {
@@ -1320,6 +1360,55 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
       setError(err.message || 'Fehler beim Speichern der Aufgaben.');
     }
   };
+
+  // Update Widget Cache whenever tasks change
+  useEffect(() => {
+    if ('caches' in window && tasks.length > 0) {
+      const updateWidgetCache = async () => {
+        try {
+          const cache = await caches.open('todo-widget-data');
+          await cache.put('/widget-tasks.json', new Response(JSON.stringify({ tasks })));
+        } catch (e) {
+          console.error('Failed to update widget cache in TodoApp', e);
+        }
+      };
+      updateWidgetCache();
+    }
+  }, [tasks]);
+
+  // Listen to messages from Service Worker for Widget actions
+  useEffect(() => {
+    const handleSWMessage = (event: MessageEvent) => {
+      if (!event.data) return;
+
+      if (event.data.type === 'WIDGET_TASK_COMPLETED') {
+        const { taskId } = event.data;
+        setTasks(prevTasks => {
+          const taskToComplete = prevTasks.find(t => t.id === taskId);
+          if (taskToComplete && !taskToComplete.isCompleted) {
+            const completed = completeTask(taskToComplete);
+            const updated = prevTasks.flatMap(t => t.id === taskId ? completed : t);
+            saveTasks(updated, true);
+            return updated;
+          }
+          return prevTasks;
+        });
+      } else if (event.data.type === 'WIDGET_TASK_ADDED') {
+        const { task } = event.data;
+        setTasks(prevTasks => {
+          if (prevTasks.some(t => t.id === task.id)) return prevTasks;
+          const updated = [...prevTasks, task];
+          saveTasks(updated, true);
+          return updated;
+        });
+      }
+    };
+
+    navigator.serviceWorker?.addEventListener('message', handleSWMessage);
+    return () => {
+      navigator.serviceWorker?.removeEventListener('message', handleSWMessage);
+    };
+  }, [saveTasks]);
 
   const handleUndo = async () => {
     if (history.length === 0) return;
@@ -1670,7 +1759,6 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
     setSelectedAssignee(null);
     setInputText(view.searchQuery);
     setHideHidden(true);
-    setIsSidebarOpen(false);
   };
 
   const handleSelectSmartView = (view: SmartViewType) => {
@@ -1694,7 +1782,6 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
       setSelectedAssignee(null);
       setInputText('');
     }
-    setIsSidebarOpen(false);
   };
 
   const allProjects = useMemo(() => {
@@ -1869,6 +1956,19 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
   }
 
   if (isPickingArchive) {
+    if (storageMode === 'gdrive') {
+      return (
+        <GoogleDrivePicker 
+          mode="archive" 
+          onFileSelected={() => {
+            setIsPickingArchive(false);
+          }} 
+          onCancel={() => {
+            setIsPickingArchive(false);
+          }}
+        />
+      );
+    }
     return (
       <OneDrivePicker 
         mode="archive" 
@@ -1966,11 +2066,10 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                 {storageMode === 'local' && (
                   <button
                     onClick={onLogout}
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-550 text-white shadow-xs transition-all cursor-pointer border-none active:scale-95 duration-150 flex-shrink-0"
-                    title={language === 'de' ? 'Mit einem Cloud-Dienst verbinden' : 'Connect to a cloud service'}
+                    className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer border-none flex-shrink-0"
+                    title={t('login', language)}
                   >
-                    <LogIn size={13} />
-                    <span>{t('login', language)}</span>
+                    <LogIn size={18} />
                   </button>
                 )}
               </div>
@@ -2021,10 +2120,9 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
               {storageMode === 'local' && (
                 <button
                   onClick={onLogout}
-                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-550 text-white shadow-xs transition-all cursor-pointer border-none active:scale-95 duration-150 flex-shrink-0"
+                  className="flex items-center px-3 py-1 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-550 text-white shadow-xs transition-all cursor-pointer border-none active:scale-95 duration-150 flex-shrink-0"
                   title={language === 'de' ? 'Mit einem Cloud-Dienst verbinden' : 'Connect to a cloud service'}
                 >
-                  <LogIn size={13} />
                   <span>{t('login', language)}</span>
                 </button>
               )}
@@ -2089,7 +2187,6 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
             setActiveSmartView(null);
             setHideHidden(true);
             setSelectedAssignee(null);
-            setIsSidebarOpen(false);
           }}
           onSelectContext={(c) => {
             setCurrentView('todo');
@@ -2097,7 +2194,6 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
             setActiveSmartView(null);
             setHideHidden(true);
             setSelectedAssignee(null);
-            setIsSidebarOpen(false);
           }}
           selectedAssignee={selectedAssignee}
           onSelectAssignee={(a) => {
@@ -2107,7 +2203,6 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
             setHideHidden(true);
             setSelectedProject(null);
             setSelectedContext(null);
-            setIsSidebarOpen(false);
           }}
           customViews={customViews}
           activeSearchQuery={inputText}
@@ -2144,25 +2239,21 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
           onSync={handleSync}
           lastSyncTime={lastSyncTime}
           formatSyncTime={formatSyncTime}
-          selectedDue={selectedDue}
+           selectedDue={selectedDue}
           onSelectDue={(due) => {
             setSelectedDue(due);
-            setIsSidebarOpen(false);
           }}
           selectedCreationDate={selectedCreationDate}
           onSelectCreationDate={(date) => {
             setSelectedCreationDate(date);
-            setIsSidebarOpen(false);
           }}
           selectedThresholdDate={selectedThresholdDate}
           onSelectThresholdDate={(date) => {
             setSelectedThresholdDate(date);
-            setIsSidebarOpen(false);
           }}
           selectedCompletionDate={selectedCompletionDate}
           onSelectCompletionDate={(date) => {
             setSelectedCompletionDate(date);
-            setIsSidebarOpen(false);
           }}
           projectPreset={projectPreset}
           contextPreset={contextPreset}

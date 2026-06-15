@@ -23,8 +23,8 @@ export const Login = ({ onLocalMode, onWebDavMode, onGitMode, onGoogleDriveMode,
       console.error('Google Login Failed:', error);
       setError('Google Anmeldung fehlgeschlagen.');
     },
-    scope: 'https://www.googleapis.com/auth/drive.file',
-    prompt: 'consent'
+    scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly',
+    prompt: 'select_account'
   });
 
   const displayError = error || externalError;

@@ -320,15 +320,22 @@
 }
 
 /* Fix Google Picker Dialog visibility and clickability on mobile devices */
-.picker-dialog {
+.picker-dialog,
+.picker-dialog-bg,
+.gapi-assistant-iframe-janus,
+.gapi-assistant-iframe,
+iframe[src*="docs.google.com/picker"],
+iframe[class*="picker"] {
   z-index: 2000000000 !important;
   pointer-events: auto !important;
+  touch-action: auto !important;
 }
 
 .picker-dialog-bg {
   z-index: 1999999999 !important;
   pointer-events: auto !important;
 }
+
 
 
 

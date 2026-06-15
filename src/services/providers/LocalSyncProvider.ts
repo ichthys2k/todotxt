@@ -166,22 +166,13 @@ export const selectElectronFile = async (title: string): Promise<string | null> 
   return await window.electronAPI.selectFile(title);
 };
 
-// --- CAPACITOR HELPERS ---
-
 const ensureCapacitorPermissions = async (): Promise<boolean> => {
-  if (!Capacitor.isNativePlatform()) return true;
-  try {
-    const status = await Filesystem.checkPermissions();
-    if (status.publicStorage !== 'granted') {
-      const requestStatus = await Filesystem.requestPermissions();
-      return requestStatus.publicStorage === 'granted';
-    }
-    return true;
-  } catch (e) {
-    console.error('Error checking Capacitor permissions', e);
-    return false;
-  }
+  // On Android and iOS, standard directory access (like Directory.Documents)
+  // does not require publicStorage permissions. Querying/requesting permissions
+  // for publicStorage without manifest declarations triggers unnecessary prompts.
+  return true;
 };
+
 
 
 export class LocalSyncProvider implements SyncProvider {

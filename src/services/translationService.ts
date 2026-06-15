@@ -227,6 +227,10 @@ export const translations = {
     onboardingBannerText: 'Deine Aufgaben werden aktuell nur im Browser gespeichert. Melde dich an, um deine Aufgaben sicher in der Cloud zu speichern und auf allen Geräten zu synchronisieren.',
     onboardingBannerSetup: 'Cloud-Sync einrichten',
     onboardingBannerDismiss: 'Ausblenden',
+    onboardingAppsTitle: 'Apps für Android & Windows',
+    onboardingAppsDesc: 'Nutze Todo.txt auch als native App für Android (Play Store) und als Desktop-Anwendung für Windows.',
+    onboardingPlayStore: 'Android App (GitHub)',
+    onboardingGitHub: 'Windows App (GitHub)',
     sampleTask1: '(A) Willkommen in der App! Erledige diese Aufgabe durch Klicken auf das Kästchen links',
     sampleTask2: 'Aufgaben strukturieren mit +Projekten und @Kontexten',
     sampleTask3: 'Füge ein Fälligkeitsdatum hinzu wie due:2026-06-30'
@@ -457,6 +461,10 @@ export const translations = {
     onboardingBannerText: 'Your tasks are currently only stored in the browser. Sign in to store your tasks securely in the cloud and sync them across all devices.',
     onboardingBannerSetup: 'Set up Cloud Sync',
     onboardingBannerDismiss: 'Dismiss',
+    onboardingAppsTitle: 'Apps for Android & Windows',
+    onboardingAppsDesc: 'Use Todo.txt as a native app for Android (Play Store) and as a desktop application for Windows.',
+    onboardingPlayStore: 'Android App (GitHub)',
+    onboardingGitHub: 'Windows App (GitHub)',
     sampleTask1: '(A) Welcome to the app! Complete this task by clicking the circle',
     sampleTask2: 'Structure tasks with +projects and @contexts',
     sampleTask3: 'Add a due date like due:2026-06-30'

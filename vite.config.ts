@@ -10,6 +10,9 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png', 'icon.png'],
       manifest: {
@@ -54,7 +57,32 @@ export default defineConfig({
             url: './?view=dashboard',
             icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
           }
+        ],
+        widgets: [
+          {
+            name: 'Aufgaben',
+            short_name: 'Aufgaben',
+            description: 'Deine anstehenden Aufgaben aus todo.txt',
+            tag: 'todotxt-tasks',
+            template: 'todotxt-tasks-template',
+            ms_ac_template: 'widgets/tasks-template.json',
+            data: 'widgets/tasks-data.json',
+            type: 'application/json',
+            auth: false,
+            update: 900,
+            icons: [
+              {
+                src: 'pwa-192x192.png',
+                sizes: '192x192',
+                type: 'image/png'
+              }
+            ]
+          }
         ]
+      } as any,
+      devOptions: {
+        enabled: true,
+        type: 'module'
       }
     })
   ],

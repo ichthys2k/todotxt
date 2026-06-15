@@ -492,7 +492,6 @@ export const Sidebar = ({
               <button
                 onClick={() => {
                   onViewChange('dashboard');
-                  if (_onClose) _onClose();
                 }}
                 className={`w-full flex items-center justify-between rounded-md text-xs transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
                   currentView === 'dashboard'

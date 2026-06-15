@@ -1,0 +1,12 @@
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\Wox.Plugin.Stub\bin\Release\net9.0\Wox.Plugin.deps.json
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\Wox.Plugin.Stub\bin\Release\net9.0\Wox.Plugin.dll
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\Wox.Plugin.Stub\bin\Release\net9.0\Wox.Plugin.pdb
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\Wox.Plugin.Stub\obj\Release\net9.0\Wox.Plugin.Stub.GeneratedMSBuildEditorConfig.editorconfig
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\Wox.Plugin.Stub\obj\Release\net9.0\Wox.Plugin.Stub.AssemblyInfoInputs.cache
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\Wox.Plugin.Stub\obj\Release\net9.0\Wox.Plugin.Stub.AssemblyInfo.cs
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\Wox.Plugin.Stub\obj\Release\net9.0\Wox.Plugin.Stub.csproj.CoreCompileInputs.cache
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\Wox.Plugin.Stub\obj\Release\net9.0\Wox.Plugin.Stub.sourcelink.json
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\Wox.Plugin.Stub\obj\Release\net9.0\Wox.Plugin.dll
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\Wox.Plugin.Stub\obj\Release\net9.0\refint\Wox.Plugin.dll
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\Wox.Plugin.Stub\obj\Release\net9.0\Wox.Plugin.pdb
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\Wox.Plugin.Stub\obj\Release\net9.0\ref\Wox.Plugin.dll

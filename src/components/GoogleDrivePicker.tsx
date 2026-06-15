@@ -1,191 +1,252 @@
-import { useState } from 'react';
-import useDrivePickerModule from 'react-google-drive-picker';
-import { GOOGLE_CLIENT_ID, GOOGLE_API_KEY, GOOGLE_APP_ID } from '../main';
+import { useState, useEffect } from 'react';
 import { getGoogleDriveToken } from '../services/providers/GoogleDriveSyncProvider';
-import { FileText, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { setSelectedGDriveFile, setSelectedGDriveArchiveFile } from '../services/storageService';
+import { Folder, FileText, ChevronRight, ArrowLeft, Plus, RefreshCw, Cloud } from 'lucide-react';
 import { PickerContainer } from './PickerContainer';
 
-const useDrivePicker = (useDrivePickerModule as any).default || useDrivePickerModule;
-
-interface GoogleDrivePickerProps {
-  onFileSelected?: () => void;
-  onCancel?: () => void;
+interface DriveItem {
+  id: string;
+  name: string;
+  mimeType: string;
 }
 
-export const GoogleDrivePicker = ({ onFileSelected, onCancel }: GoogleDrivePickerProps) => {
-  const [openPicker] = useDrivePicker();
-  const [todoId, setTodoId] = useState<string | null>(localStorage.getItem('todo_txt_gdrive_todo_id'));
-  const [archiveId, setArchiveId] = useState<string | null>(localStorage.getItem('todo_txt_gdrive_archive_id'));
+interface GoogleDrivePickerProps {
+  onFileSelected: () => void;
+  onCancel?: () => void;
+  mode?: 'todo' | 'archive';
+}
 
-  const getCustomViews = () => {
-    if (typeof window !== 'undefined' && (window as any).google) {
-      const google = (window as any).google;
+export const GoogleDrivePicker = ({ onFileSelected, onCancel, mode = 'todo' }: GoogleDrivePickerProps) => {
+  const [currentFolderId, setCurrentFolderId] = useState<string>('root');
+  const [folderHistory, setFolderHistory] = useState<{ id: string; name: string }[]>([{ id: 'root', name: 'Google Drive' }]);
+  const [items, setItems] = useState<DriveItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [newFileName, setNewFileName] = useState(mode === 'todo' ? 'todo.txt' : 'archive.txt');
+
+  useEffect(() => {
+    loadItems(currentFolderId);
+  }, [currentFolderId]);
+
+  const loadItems = async (folderId: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const token = getGoogleDriveToken();
+      if (!token) throw new Error('Nicht angemeldet.');
+
+      // Build query: items inside the parent folder and not trashed
+      const q = `'${folderId}' in parents and trashed = false`;
+      const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,mimeType)&pageSize=100`;
+
+      const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Google-Sitzung abgelaufen. Bitte erneut anmelden.');
+        }
+        throw new Error(`Fehler beim Abrufen der Google Drive Dateien: ${response.status}`);
+      }
+
+      const data = await response.json();
       
-      const docsViewOwned = new google.picker.DocsView(google.picker.ViewId.DOCS)
-        .setIncludeFolders(true)
-        .setSelectFolderEnabled(false)
-        .setOwnedByMe(true);
-        
-      const docsViewShared = new google.picker.DocsView(google.picker.ViewId.DOCS)
-        .setIncludeFolders(true)
-        .setSelectFolderEnabled(false)
-        .setOwnedByMe(false);
-        
-      return [docsViewOwned, docsViewShared];
+      // Filter: Folders and text files only
+      const filtered = (data.files || []).filter((file: DriveItem) => {
+        const isFolder = file.mimeType === 'application/vnd.google-apps.folder';
+        const isTxtFile = file.mimeType === 'text/plain' || file.name.toLowerCase().endsWith('.txt');
+        return isFolder || isTxtFile;
+      });
+
+      // Sort: Folders first, then files alphabetically
+      const sorted = filtered.sort((a: DriveItem, b: DriveItem) => {
+        const isFolderA = a.mimeType === 'application/vnd.google-apps.folder';
+        const isFolderB = b.mimeType === 'application/vnd.google-apps.folder';
+        if (isFolderA && !isFolderB) return -1;
+        if (!isFolderA && isFolderB) return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      setItems(sorted);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Fehler beim Laden der Google Drive Dateien.');
+    } finally {
+      setLoading(false);
     }
-    return undefined;
   };
 
-  const handlePickTodo = () => {
-    const token = getGoogleDriveToken();
-    if (!token) return;
-
-    const customViews = getCustomViews();
-
-    openPicker({
-      clientId: GOOGLE_CLIENT_ID,
-      developerKey: GOOGLE_API_KEY,
-      appId: GOOGLE_APP_ID,
-      viewId: 'DOCS',
-      token: token,
-      showUploadView: true,
-      showUploadFolders: true,
-      supportDrives: true,
-      multiselect: false,
-      customViews: customViews,
-      disableDefaultView: !!customViews,
-      setOrigin: window.location.origin,
-      callbackFunction: (data: any) => {
-        console.log('Google Picker Callback (Todo):', data);
-        if (data.action === 'picked') {
-          const id = data.docs[0].id;
-          console.log('Google Picker picked Todo ID:', id);
-          localStorage.setItem('todo_txt_gdrive_todo_id', id);
-          setTodoId(id);
-        }
-      }
-    });
+  const handleFolderClick = (item: DriveItem) => {
+    setFolderHistory([...folderHistory, { id: item.id, name: item.name }]);
+    setCurrentFolderId(item.id);
   };
 
-  const handlePickArchive = () => {
-    const token = getGoogleDriveToken();
-    if (!token) return;
-
-    const customViews = getCustomViews();
-
-    openPicker({
-      clientId: GOOGLE_CLIENT_ID,
-      developerKey: GOOGLE_API_KEY,
-      appId: GOOGLE_APP_ID,
-      viewId: 'DOCS',
-      token: token,
-      showUploadView: true,
-      showUploadFolders: true,
-      supportDrives: true,
-      multiselect: false,
-      customViews: customViews,
-      disableDefaultView: !!customViews,
-      setOrigin: window.location.origin,
-      callbackFunction: (data: any) => {
-        console.log('Google Picker Callback (Archive):', data);
-        if (data.action === 'picked') {
-          const id = data.docs[0].id;
-          console.log('Google Picker picked Archive ID:', id);
-          localStorage.setItem('todo_txt_gdrive_archive_id', id);
-          setArchiveId(id);
-        }
-      }
-    });
+  const handleBackClick = () => {
+    if (folderHistory.length <= 1) return;
+    const newHistory = [...folderHistory];
+    newHistory.pop();
+    setFolderHistory(newHistory);
+    setCurrentFolderId(newHistory[newHistory.length - 1].id);
   };
 
-  const handleReset = () => {
-    localStorage.removeItem('todo_txt_gdrive_todo_id');
-    localStorage.removeItem('todo_txt_gdrive_archive_id');
-    setTodoId(null);
-    setArchiveId(null);
-  };
-
-  const handleFinish = () => {
-    if (onFileSelected) {
-      onFileSelected();
+  const handleFileSelect = (item: DriveItem) => {
+    if (mode === 'archive') {
+      setSelectedGDriveArchiveFile(item.id);
     } else {
-      window.location.reload();
+      setSelectedGDriveFile(item.id);
     }
+    onFileSelected();
   };
 
-  const googleIcon = (
-    <svg className="w-6 h-6" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z"/>
-      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-    </svg>
-  );
+  const handleCreateFile = async () => {
+    try {
+      if (!newFileName.trim()) return;
+      setCreating(true);
+      setError(null);
+      
+      const token = getGoogleDriveToken();
+      if (!token) throw new Error('Nicht angemeldet.');
+
+      const metadata = {
+        name: newFileName.trim(),
+        mimeType: 'text/plain',
+        parents: currentFolderId === 'root' ? [] : [currentFolderId]
+      };
+
+      const response = await fetch('https://www.googleapis.com/drive/v3/files', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(metadata)
+      });
+
+      if (!response.ok) throw new Error(`Fehler beim Erstellen der Datei: ${response.status}`);
+      const data = await response.json();
+      
+      if (mode === 'archive') {
+        setSelectedGDriveArchiveFile(data.id);
+      } else {
+        setSelectedGDriveFile(data.id);
+      }
+      onFileSelected();
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Fehler beim Erstellen der Datei.');
+      setCreating(false);
+    }
+  };
 
   return (
     <PickerContainer
-      title="Google Drive Dateien wählen"
-      description={
-        <>Bitte wähle deine bestehende <code className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-indigo-600 dark:text-indigo-400">todo.txt</code> Datei aus deinem Google Drive aus.</>
-      }
-      icon={googleIcon}
+      title={mode === 'todo' ? "Wähle deine todo.txt (Google Drive)" : "Wähle deine archive.txt (Google Drive)"}
+      description="Navigiere durch dein Google Drive und wähle die Textdatei aus oder erstelle eine neue im aktuellen Ordner."
+      icon={<Cloud className="w-6 h-6 text-indigo-500" />}
       onCancel={onCancel}
-      maxWidth="md"
     >
-      <div className="w-full space-y-4 mt-4">
-        {/* Todo File Picker */}
-        <div className={`p-4 rounded-xl border-2 transition-colors flex items-center justify-between ${todoId ? 'border-green-500 bg-green-50/50 dark:bg-green-900/10' : 'border-slate-200 dark:border-slate-800'}`}>
-          <div className="flex items-center gap-3">
-            {todoId ? <CheckCircle2 className="text-green-500" /> : <AlertCircle className="text-slate-400" />}
-            <div className="text-left">
-              <div className="font-bold text-slate-800 dark:text-slate-200">todo.txt</div>
-              <div className="text-xs text-slate-500">{todoId ? 'Ausgewählt' : 'Nicht ausgewählt'}</div>
-            </div>
-          </div>
-          <button
-            onClick={handlePickTodo}
-            className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors cursor-pointer"
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex-1 flex flex-col overflow-hidden shadow-sm">
+        {/* Header / Breadcrumbs */}
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3 bg-slate-50 dark:bg-slate-900/50">
+          <button 
+            onClick={handleBackClick}
+            disabled={folderHistory.length <= 1}
+            className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
           >
-            {todoId ? 'Ändern' : 'Wählen'}
+            <ArrowLeft size={18} />
+          </button>
+          <div className="flex-1 font-medium truncate flex items-center gap-2">
+            <Folder size={18} className="text-indigo-500 dark:text-indigo-400" />
+            <span className="text-slate-700 dark:text-slate-300 text-sm md:text-base">
+              {folderHistory.map((f, i) => (
+                <span key={f.id}>
+                  {i > 0 && <span className="mx-1.5 text-slate-400">/</span>}
+                  {f.name}
+                </span>
+              ))}
+            </span>
+          </div>
+          <button 
+            onClick={() => loadItems(currentFolderId)}
+            className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-955 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+            title="Aktualisieren"
+          >
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
 
-        {/* Archive File Picker */}
-        <div className={`p-4 rounded-xl border-2 transition-colors flex items-center justify-between ${archiveId ? 'border-green-500 bg-green-50/50 dark:bg-green-900/10' : 'border-slate-200 dark:border-slate-800'}`}>
-          <div className="flex items-center gap-3">
-            {archiveId ? <CheckCircle2 className="text-green-500" /> : <FileText className="text-slate-400" />}
-            <div className="text-left">
-              <div className="font-bold text-slate-800 dark:text-slate-200">archive.txt (Optional)</div>
-              <div className="text-xs text-slate-500">{archiveId ? 'Ausgewählt' : 'Nicht ausgewählt'}</div>
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto min-h-[300px]">
+          {error && (
+            <div className="p-4 m-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-lg flex items-center gap-2 text-sm">
+              <span>{error}</span>
             </div>
+          )}
+
+          {loading ? (
+            <div className="flex flex-col items-center justify-center h-64 text-slate-400 dark:text-slate-500 gap-3">
+              <RefreshCw size={32} className="animate-spin text-indigo-500" />
+              <span className="text-sm">Lade Dateien...</span>
+            </div>
+          ) : items.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-64 text-slate-400 dark:text-slate-500">
+              <Folder size={48} className="stroke-[1] mb-2 opacity-50" />
+              <span className="text-sm">Dieser Ordner ist leer.</span>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              {items.map((item) => {
+                const isFolder = item.mimeType === 'application/vnd.google-apps.folder';
+                return (
+                  <div 
+                    key={item.id}
+                    onClick={() => isFolder ? handleFolderClick(item) : handleFileSelect(item)}
+                    className="flex items-center justify-between p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      {isFolder ? (
+                        <Folder className="w-5 h-5 text-indigo-500 dark:text-indigo-400 shrink-0" />
+                      ) : (
+                        <FileText className="w-5 h-5 text-slate-400 dark:text-slate-500 shrink-0" />
+                      )}
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
+                        {item.name}
+                      </span>
+                    </div>
+                    {isFolder && (
+                      <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-600 group-hover:text-slate-650 transition-colors" />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Action Footer for Creating File */}
+        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex flex-col sm:flex-row gap-3 items-center">
+          <div className="relative w-full sm:max-w-xs">
+            <input 
+              type="text" 
+              value={newFileName}
+              onChange={(e) => setNewFileName(e.target.value)}
+              disabled={creating}
+              placeholder={mode === 'todo' ? "todo.txt" : "archive.txt"}
+              className="w-full pl-3 pr-10 py-2 bg-white dark:bg-slate-900 border border-slate-250 dark:border-slate-750 rounded-lg text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
           </div>
           <button
-            onClick={handlePickArchive}
-            className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+            onClick={handleCreateFile}
+            disabled={creating || !newFileName.trim()}
+            className="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 transition-colors"
           >
-            {archiveId ? 'Ändern' : 'Wählen'}
+            <Plus size={16} />
+            <span>Erstellen</span>
           </button>
         </div>
       </div>
-
-      {(todoId || archiveId) && (
-        <div className="w-full mt-8 flex gap-3">
-          <button
-            onClick={handleReset}
-            className="px-4 py-3 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-xl font-bold hover:bg-red-100 dark:hover:bg-red-950/40 transition-colors flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <RefreshCw size={18} />
-          </button>
-          
-          <button
-            onClick={handleFinish}
-            disabled={!todoId}
-            className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          >
-            Los geht's
-          </button>
-        </div>
-      )}
     </PickerContainer>
   );
 };

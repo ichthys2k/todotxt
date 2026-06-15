@@ -281,3 +281,12 @@ export class GoogleDriveSyncProvider implements SyncProvider {
     return { todoSynced, archiveSynced, configSynced };
   }
 }
+
+export const setSelectedGDriveFile = (fileId: string) => {
+  localStorage.setItem(GDRIVE_TODO_ID_KEY, fileId);
+};
+
+export const setSelectedGDriveArchiveFile = (fileId: string) => {
+  localStorage.setItem(GDRIVE_ARCHIVE_ID_KEY, fileId);
+};
+

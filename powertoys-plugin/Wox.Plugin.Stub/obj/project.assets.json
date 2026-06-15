@@ -1,0 +1,69 @@
+{
+  "version": 3,
+  "targets": {
+    "net9.0": {}
+  },
+  "libraries": {},
+  "projectFileDependencyGroups": {
+    "net9.0": []
+  },
+  "packageFolders": {
+    "C:\\Users\\corne\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "Z:\\OneDrive - Freie Evangelische Schule Reutlingen e.V\\Dokumente\\10Informatik\\Klasse 09\\Antigravity\\Projekte\\todotxtwebapp\\powertoys-plugin\\Wox.Plugin.Stub\\Wox.Plugin.Stub.csproj",
+      "projectName": "Wox.Plugin",
+      "projectPath": "Z:\\OneDrive - Freie Evangelische Schule Reutlingen e.V\\Dokumente\\10Informatik\\Klasse 09\\Antigravity\\Projekte\\todotxtwebapp\\powertoys-plugin\\Wox.Plugin.Stub\\Wox.Plugin.Stub.csproj",
+      "packagesPath": "C:\\Users\\corne\\.nuget\\packages\\",
+      "outputPath": "Z:\\OneDrive - Freie Evangelische Schule Reutlingen e.V\\Dokumente\\10Informatik\\Klasse 09\\Antigravity\\Projekte\\todotxtwebapp\\powertoys-plugin\\Wox.Plugin.Stub\\obj\\",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "C:\\Users\\corne\\AppData\\Roaming\\NuGet\\NuGet.Config"
+      ],
+      "originalTargetFrameworks": [
+        "net9.0"
+      ],
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.300"
+    },
+    "frameworks": {
+      "net9.0": {
+        "targetAlias": "net9.0",
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.315/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

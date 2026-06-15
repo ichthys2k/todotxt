@@ -1,0 +1,52 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "TodoTxtPowerToysPlugin/1.0.0": {
+        "dependencies": {
+          "Wox.Plugin": "1.0.0",
+          "Wox.Plugin.Reference": "0.100.0.0"
+        },
+        "runtime": {
+          "TodoTxtPowerToysPlugin.dll": {}
+        }
+      },
+      "Wox.Plugin/1.0.0": {
+        "runtime": {
+          "Wox.Plugin.dll": {
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "Wox.Plugin.Reference/0.100.0.0": {
+        "runtime": {
+          "Wox.Plugin.dll": {
+            "assemblyVersion": "0.100.0.0",
+            "fileVersion": "0.100.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "TodoTxtPowerToysPlugin/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Wox.Plugin/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Wox.Plugin.Reference/0.100.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "ID": "E2D7F39C-8A9F-4D2A-B981-FA7EFE028BE9",
+  "ActionKeyword": "todo",
+  "IsGlobal": false,
+  "Name": "Todo.txt",
+  "Author": "ichthys2k",
+  "Version": "1.0.0",
+  "Language": "csharp",
+  "Website": "https://github.com/ichthys2k/todotxt",
+  "ExecuteFileName": "TodoTxtPowerToysPlugin.dll",
+  "IcoPathDark": "Images/icon.png",
+  "IcoPathLight": "Images/icon.png"
+}

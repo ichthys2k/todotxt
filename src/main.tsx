@@ -22,8 +22,15 @@ export const GOOGLE_APP_ID = import.meta.env.VITE_GOOGLE_APP_ID || '';
 // Google Cloud API-Schlüssel (für den Google Picker)
 export const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
 
-// Initialize MSAL before rendering
-msalInstance.initialize().then(() => {
+import { restoreLocalStorageBackup, initLocalStorageBackup } from './services/localStoragePersistence.ts';
+
+// Initialize localStorage backup and MSAL before rendering
+const startApp = async () => {
+  await restoreLocalStorageBackup();
+  initLocalStorageBackup();
+  
+  await msalInstance.initialize();
+  
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
@@ -33,4 +40,7 @@ msalInstance.initialize().then(() => {
       </GoogleOAuthProvider>
     </StrictMode>,
   );
-});
+};
+
+startApp();
+
