@@ -55,10 +55,32 @@ async function main() {
     'mipmap-xxhdpi':  144,
     'mipmap-xxxhdpi': 192,
   };
-  const resBase = path.join(__dirname, 'app', 'src', 'main', 'res');
+  const resBase = path.join(__dirname, 'android', 'app', 'src', 'main', 'res');
 
   for (const [folder, size] of Object.entries(mipmapSizes)) {
     await resize(SRC, path.join(resBase, folder, 'ic_launcher.png'), size);
+    await resize(SRC, path.join(resBase, folder, 'ic_launcher_round.png'), size);
+    
+    // The foreground icon for adaptive icons should have some padding
+    const fgSize = Math.round(size * 0.75);
+    const fgPadding = Math.round((size - fgSize) / 2);
+    const fgBuffer = await sharp(SRC)
+      .resize(fgSize, fgSize, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .png()
+      .toBuffer();
+      
+    await sharp({
+      create: {
+        width: size,
+        height: size,
+        channels: 4,
+        background: { r: 0, g: 0, b: 0, alpha: 0 }
+      }
+    })
+    .composite([{ input: fgBuffer, top: fgPadding, left: fgPadding }])
+    .png()
+    .toFile(path.join(resBase, folder, 'ic_launcher_foreground.png'));
+    console.log(`  Foreground: ${folder}/ic_launcher_foreground.png  (${size}×${size})`);
   }
 
   // ── Android mipmap (maskable icon — larger safe zone) ──────────────────────
@@ -96,45 +118,23 @@ async function main() {
     console.log(`  ✅  ${folder}/ic_maskable.png  (${size}×${size})`);
   }
 
-  // ── Android drawable (shortcuts + splash + notification) ───────────────────
-  console.log('\n── Android drawable (shortcuts, splash, notification) ──');
-  const drawableSizes = {
-    'drawable-mdpi':    48,
-    'drawable-hdpi':    72,
-    'drawable-xhdpi':   96,
-    'drawable-xxhdpi':  144,
-    'drawable-xxxhdpi': 192,
-  };
-
-  for (const [folder, size] of Object.entries(drawableSizes)) {
-    const folderPath = path.join(resBase, folder);
-    // Shortcut icons (same icon for both shortcuts)
-    await resize(SRC, path.join(folderPath, 'shortcut_0.png'), size);
-    await resize(SRC, path.join(folderPath, 'shortcut_1.png'), size);
-  }
+  // Shortcuts and notifications go to the general 'drawable' folder or corresponding drawable-port folder
+  const drawableFolder = path.join(resBase, 'drawable');
+  await resize(SRC, path.join(drawableFolder, 'shortcut_0.png'), 96);
+  await resize(SRC, path.join(drawableFolder, 'shortcut_1.png'), 96);
+  await resize(SRC, path.join(drawableFolder, 'ic_notification_icon.png'), 48);
+  await resize(SRC_HI, path.join(drawableFolder, 'splash.png'), 512); // Overwrite drawable/splash.png rocket icon
 
   // Splash screen (320×320 for hdpi base — using hi-res source)
   const splashSizes = {
-    'drawable-mdpi':    240,
-    'drawable-hdpi':    320,
-    'drawable-xhdpi':   480,
-    'drawable-xxhdpi':  640,
-    'drawable-xxxhdpi': 960,
+    'drawable-port-mdpi':    240,
+    'drawable-port-hdpi':    320,
+    'drawable-port-xhdpi':   480,
+    'drawable-port-xxhdpi':  640,
+    'drawable-port-xxxhdpi': 960,
   };
   for (const [folder, size] of Object.entries(splashSizes)) {
     await resize(SRC_HI, path.join(resBase, folder, 'splash.png'), size);
-  }
-
-  // Notification icon (white silhouette is ideal, but for now use the icon scaled down)
-  const notifSizes = {
-    'drawable-mdpi':    24,
-    'drawable-hdpi':    36,
-    'drawable-xhdpi':   48,
-    'drawable-xxhdpi':  72,
-    'drawable-xxxhdpi': 96,
-  };
-  for (const [folder, size] of Object.entries(notifSizes)) {
-    await resize(SRC, path.join(resBase, folder, 'ic_notification_icon.png'), size);
   }
 
   console.log('\n✅  Alle Icons erfolgreich generiert!\n');
