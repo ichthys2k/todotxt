@@ -17,8 +17,8 @@ const ZIPALIGN_EXE = 'C:\\Users\\corne\\.bubblewrap\\android_sdk\\build-tools\\3
 const APKSIGNER_JAR = 'C:\\Users\\corne\\.bubblewrap\\android_sdk\\build-tools\\34.0.0\\lib\\apksigner.jar';
 
 // Source Files
-const SRC_APK = path.join(__dirname, 'app', 'build', 'outputs', 'apk', 'release', 'app-release-unsigned.apk');
-const SRC_AAB = path.join(__dirname, 'app', 'build', 'outputs', 'bundle', 'release', 'app-release.aab');
+const SRC_APK = path.join(__dirname, 'android', 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk');
+const SRC_AAB = path.join(__dirname, 'android', 'app', 'build', 'outputs', 'bundle', 'release', 'app-release.aab');
 
 // Target Files
 const TEMP_ALIGNED_APK = path.join(__dirname, 'app-release-unsigned-aligned.apk');
