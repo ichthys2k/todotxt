@@ -25,4 +25,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   /** Close the desktop widget window. */
   closeWidgetWindow: () => ipcRenderer.invoke('electron:closeWidgetWindow'),
+
+  /** Check for updates (Electron main process autoUpdater). */
+  checkForUpdates: () => ipcRenderer.invoke('electron:checkForUpdates'),
+
+  /** Listen for update status callbacks. */
+  onUpdaterStatus: (callback) => ipcRenderer.on('updater:status', (_event, status, info) => callback(status, info)),
 });

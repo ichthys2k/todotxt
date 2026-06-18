@@ -80,6 +80,28 @@ ipcMain.handle('electron:closeWidgetWindow', async () => {
   }
 });
 
+ipcMain.handle('electron:checkForUpdates', async () => {
+  if (!app.isPackaged) {
+    if (mainWindow) {
+      mainWindow.webContents.send('updater:status', 'dev');
+    }
+    return { status: 'dev' };
+  }
+  try {
+    if (mainWindow) {
+      mainWindow.webContents.send('updater:status', 'checking');
+    }
+    await autoUpdater.checkForUpdates();
+    return { status: 'checking' };
+  } catch (err) {
+    console.error('Update check error:', err);
+    if (mainWindow) {
+      mainWindow.webContents.send('updater:status', 'error', err.message);
+    }
+    return { status: 'error', error: err.message };
+  }
+});
+
 // ---------------------------------------------------------------------------
 // Window creation
 // ---------------------------------------------------------------------------
@@ -283,7 +305,34 @@ app.on('ready', () => {
   createTray();
 
   // Auto-Update Events & Check
+  autoUpdater.on('checking-for-update', () => {
+    if (mainWindow) {
+      mainWindow.webContents.send('updater:status', 'checking');
+    }
+  });
+
+  autoUpdater.on('update-available', (info) => {
+    if (mainWindow) {
+      mainWindow.webContents.send('updater:status', 'available', info.version);
+    }
+  });
+
+  autoUpdater.on('update-not-available', (info) => {
+    if (mainWindow) {
+      mainWindow.webContents.send('updater:status', 'not-available');
+    }
+  });
+
+  autoUpdater.on('error', (err) => {
+    if (mainWindow) {
+      mainWindow.webContents.send('updater:status', 'error', err.message);
+    }
+  });
+
   autoUpdater.on('update-downloaded', (info) => {
+    if (mainWindow) {
+      mainWindow.webContents.send('updater:status', 'downloaded', info.version);
+    }
     dialog.showMessageBox(mainWindow, {
       type: 'info',
       title: 'Update verfügbar',

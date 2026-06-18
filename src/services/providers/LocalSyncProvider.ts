@@ -12,6 +12,8 @@ declare global {
       setPaths: (todoPath: string | null, archivePath: string | null) => Promise<void>;
       showMainWindow: () => Promise<void>;
       closeWidgetWindow: () => Promise<void>;
+      checkForUpdates: () => Promise<void>;
+      onUpdaterStatus: (callback: (status: string, info: string) => void) => void;
     };
   }
 }

@@ -12,13 +12,14 @@ import { LocalPicker } from './LocalPicker';
 import { GitPicker } from './GitPicker';
 import { KanbanBoard } from './KanbanBoard';
 import { DashboardView } from './DashboardView';
-import { Archive, Wifi, RefreshCw, Rows, LayoutGrid, Menu, Undo, ArrowUpDown, Settings, Filter, HelpCircle, Layers, CheckCircle, Sliders, Palette, Database, Smile, Globe, LogIn, Share2, Merge, Copy, X, AlertTriangle } from 'lucide-react';
+import { Archive, Wifi, RefreshCw, Rows, LayoutGrid, Menu, Undo, ArrowUpDown, Settings, Filter, HelpCircle, Layers, CheckCircle, Sliders, Palette, Database, Smile, Globe, LogIn, Share2, Merge, Copy, X, AlertTriangle, Download } from 'lucide-react';
 import { getTheme, setTheme } from '../services/themeService';
 import { getDensity, setDensity, applyDensity, type Density } from '../services/densityService';
 import { HelpModal } from './HelpModal';
 import { playTaskCreatedSound, playTaskCompletedSound } from '../utils/audio';
 import { t } from '../services/translationService';
 import type { Language } from '../services/translationService';
+
 
 export interface CustomView {
   id: string;
@@ -34,12 +35,16 @@ const migrationTranslations: Record<'de' | 'en', Record<string, string>> = {
     desc: 'Wir haben festgestellt, dass du zuvor Aufgaben in "{prevMode}" gespeichert hast. Möchtest du diese ({count} Aufgaben) in deinen neuen Speicher ({currentMode}) übertragen?',
     mergeOptionTitle: 'Zusammenführen (Empfohlen)',
     mergeOptionDesc: 'Fügt deine vorherigen Aufgaben zu den neuen Aufgaben hinzu. Duplikate werden vermieden.',
-    overwriteOptionTitle: 'Überschreiben',
+    overwriteOptionTitle: 'Überschreiben (Upload)',
     overwriteOptionDesc: 'Ersetzt alle Aufgaben im neuen Speicher komplett mit den vorherigen Aufgaben.',
+    downloadOptionTitle: 'Herunterladen (Download)',
+    downloadOptionDesc: 'Ersetzt deine vorherigen Aufgaben komplett mit den Aufgaben aus dem neuen Speicher.',
     btnSkip: 'Nicht migrieren',
     btnMerge: 'Zusammenführen',
     btnOverwrite: 'Überschreiben',
+    btnDownload: 'Herunterladen',
     successMsg: 'Migration erfolgreich abgeschlossen!',
+    successDownloadMsg: 'Cloud-Daten erfolgreich geladen!',
     modeLocal: 'Lokal (Browser)',
     modeOnedrive: 'OneDrive',
     modeWebdav: 'WebDAV',
@@ -51,12 +56,16 @@ const migrationTranslations: Record<'de' | 'en', Record<string, string>> = {
     desc: 'We noticed you have tasks saved in "{prevMode}". Would you like to transfer these ({count} tasks) to your new storage ({currentMode})?',
     mergeOptionTitle: 'Merge (Recommended)',
     mergeOptionDesc: 'Appends your previous tasks to the new storage. Avoids duplicates.',
-    overwriteOptionTitle: 'Overwrite',
+    overwriteOptionTitle: 'Overwrite (Upload)',
     overwriteOptionDesc: 'Replaces all tasks in the new storage completely with the previous ones.',
+    downloadOptionTitle: 'Download (Keep Cloud data)',
+    downloadOptionDesc: 'Replaces your previous tasks completely with the tasks from the new storage.',
     btnSkip: 'Do not migrate',
     btnMerge: 'Merge',
     btnOverwrite: 'Overwrite',
+    btnDownload: 'Download',
     successMsg: 'Migration completed successfully!',
+    successDownloadMsg: 'Cloud data successfully loaded!',
     modeLocal: 'Local (Browser)',
     modeOnedrive: 'OneDrive',
     modeWebdav: 'WebDAV',
@@ -261,7 +270,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
 
 
 
-  const handlePerformMigration = async (type: 'merge' | 'overwrite') => {
+  const handlePerformMigration = async (type: 'merge' | 'overwrite' | 'download') => {
     if (!migrationData) return;
     try {
       setLoading(true);
@@ -271,7 +280,15 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
       let finalArchive = migrationData.prevArchiveStr;
       let finalConfig = migrationData.prevConfigStr;
 
-      if (type === 'merge') {
+      if (type === 'download') {
+        finalTodo = await fetchTodoContent(storageMode);
+        finalArchive = await fetchArchiveContent(storageMode);
+        try {
+          finalConfig = await fetchConfigContent(storageMode);
+        } catch (e) {
+          finalConfig = '';
+        }
+      } else if (type === 'merge') {
         const currentTodo = await fetchTodoContent(storageMode);
         const currentArchive = await fetchArchiveContent(storageMode);
         
@@ -306,7 +323,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
       setTasks(updatedTodos);
       setIsConfigLoaded(false);
 
-      showToast(mt('successMsg'));
+      showToast(type === 'download' ? mt('successDownloadMsg') : mt('successMsg'));
     } catch (err: any) {
       console.error(err);
       setError('Migration fehlgeschlagen: ' + (err.message || err));
@@ -351,7 +368,6 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const toastTimeoutRef = useRef<any>(null);
-
   const showToast = (msg: string) => {
     if (toastTimeoutRef.current) {
       clearTimeout(toastTimeoutRef.current);
@@ -435,6 +451,46 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
 
   const texts = localTexts[language] || localTexts['en'];
   const colors = colorNames[language] || colorNames['en'];
+
+  const [checkingUpdates, setCheckingUpdates] = useState(false);
+
+  useEffect(() => {
+    if (isElectron && window.electronAPI?.onUpdaterStatus) {
+      window.electronAPI.onUpdaterStatus((status: string, info: string) => {
+        if (status === 'checking') {
+          setCheckingUpdates(true);
+          showToast(language === 'de' ? 'Suche nach Updates...' : 'Checking for updates...');
+        } else if (status === 'available') {
+          setCheckingUpdates(false);
+          showToast(language === 'de' ? `Update auf Version ${info} verfügbar!` : `Update to version ${info} available!`);
+        } else if (status === 'not-available') {
+          setCheckingUpdates(false);
+          showToast(language === 'de' ? 'Deine App ist auf dem neuesten Stand.' : 'Your app is up to date.');
+        } else if (status === 'downloaded') {
+          setCheckingUpdates(false);
+          showToast(language === 'de' ? 'Update heruntergeladen!' : 'Update downloaded!');
+        } else if (status === 'dev') {
+          setCheckingUpdates(false);
+          showToast(language === 'de' ? 'Entwicklungsmodus - keine Updateprüfung möglich.' : 'Development mode - update check not available.');
+        } else if (status === 'error') {
+          setCheckingUpdates(false);
+          showToast(language === 'de' ? `Fehler: ${info}` : `Error: ${info}`);
+        }
+      });
+    }
+  }, [language]);
+
+  const handleCheckForUpdates = async () => {
+    if (isElectron && window.electronAPI?.checkForUpdates) {
+      setCheckingUpdates(true);
+      try {
+        await window.electronAPI.checkForUpdates();
+      } catch (err) {
+        setCheckingUpdates(false);
+        showToast(language === 'de' ? 'Fehler beim Suchen nach Updates.' : 'Failed to check for updates.');
+      }
+    }
+  };
 
   // Density State
   const [currentDensity, setCurrentDensity] = useState<Density>(getDensity());
@@ -2166,6 +2222,16 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
               >
                 <Settings size={18} />
               </button>
+              {isElectron && (
+                <button
+                  onClick={handleCheckForUpdates}
+                  disabled={checkingUpdates}
+                  className="p-1.5 rounded-md text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors disabled:opacity-50"
+                  title="Nach Updates suchen"
+                >
+                  <RefreshCw size={18} className={checkingUpdates ? "animate-spin text-indigo-500" : ""} />
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -2550,7 +2616,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                   }`}
                 >
                   <Sliders size={16} />
-                  <span>Allgemein</span>
+                  <span>{t('tabGeneral', language)}</span>
                 </button>
                 <button
                   onClick={() => setActiveSettingsTab('accents')}
@@ -2561,7 +2627,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                   }`}
                 >
                   <Palette size={16} />
-                  <span>Farben & Emojis</span>
+                  <span>{t('tabView', language)}</span>
                 </button>
                 <button
                   onClick={() => setActiveSettingsTab('files')}
@@ -2572,7 +2638,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                   }`}
                 >
                   <Database size={16} />
-                  <span>Cloud & Dateien</span>
+                  <span>{t('tabFiles', language)}</span>
                 </button>
                 <button
                   onClick={() => setActiveSettingsTab('filters')}
@@ -2583,7 +2649,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                   }`}
                 >
                   <Filter size={16} />
-                  <span>Filter & Ansicht</span>
+                  <span>{t('tabFilterBehavior', language)}</span>
                 </button>
               </div>
 
@@ -2595,14 +2661,14 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                   <div className="space-y-5 animate-fade-in">
                     {/* Language Switcher */}
                     <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <label className="text-xs font-semibold text-slate-455 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                         <Globe size={13} className="text-indigo-500" />
                         {t('languageLabel', language)}
                       </label>
                       <select
                         value={language}
                         onChange={(e) => handleLanguageChange(e.target.value as Language)}
-                        className="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-900 border border-slate-205 dark:border-slate-800 rounded-xl p-3 text-sm font-semibold text-slate-800 dark:text-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                        className="w-full bg-slate-50 hover:bg-slate-105 dark:bg-slate-950 dark:hover:bg-slate-900 border border-slate-205 dark:border-slate-800 rounded-xl p-3 text-sm font-semibold text-slate-800 dark:text-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
                       >
                         <option value="de">Deutsch</option>
                         <option value="en">English</option>
@@ -2615,13 +2681,40 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                         <option value="hi">हिन्दी (Hindi)</option>
                         <option value="pt">Português (Portugiesisch)</option>
                         <option value="sw">Schwäbisch</option>
-                        <option value="uk">Українська (Ukrainisch)</option>
+                        <option value="uk">Ukranian (Ukrainisch)</option>
                         <option value="he">עברית (Hebräisch)</option>
                         <option value="el">Ελληνικά (Griechisch)</option>
                         <option value="tr">Türkçe (Türkisch)</option>
                       </select>
                     </div>
 
+                    {/* System-Benachrichtigungen */}
+                    <div className="bg-slate-50 dark:bg-slate-950/40 p-4 rounded-2xl border border-slate-200 dark:border-slate-800/80 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold text-slate-750 dark:text-slate-200">{t('notificationsLabel', language)}</span>
+                        <button
+                          onClick={() => handleToggleNotifications(!notificationsEnabled)}
+                          className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                            notificationsEnabled ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-slate-800'
+                          }`}
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                              notificationsEnabled ? 'translate-x-5' : 'translate-x-0'
+                            }`}
+                          />
+                        </button>
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal">
+                        {t('notificationsDesc', language)}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. VIEW SETTINGS */}
+                {activeSettingsTab === 'accents' && (
+                  <div className="space-y-5 animate-fade-in">
                     {/* Theme Switcher */}
                     <div className="space-y-2">
                       <label className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
@@ -2666,50 +2759,6 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                       </div>
                     </div>
 
-                    {/* System-Benachrichtigungen */}
-                    <div className="bg-slate-50 dark:bg-slate-950/40 p-4 rounded-2xl border border-slate-200 dark:border-slate-800/80 space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold text-slate-750 dark:text-slate-200">{t('notificationsLabel', language)}</span>
-                        <button
-                          onClick={() => handleToggleNotifications(!notificationsEnabled)}
-                          className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                            notificationsEnabled ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-slate-800'
-                          }`}
-                        >
-                          <span
-                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                              notificationsEnabled ? 'translate-x-5' : 'translate-x-0'
-                            }`}
-                          />
-                        </button>
-                      </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal">
-                        {t('notificationsDesc', language)}
-                      </p>
-                    </div>
-
-                    {/* Werkseinstellungen zurücksetzen */}
-                    <div className="bg-red-50/45 dark:bg-red-950/10 p-4 rounded-2xl border border-red-200/60 dark:border-red-900/30 space-y-3">
-                      <div className="flex items-center gap-2 text-red-655 dark:text-red-400 font-bold">
-                        <AlertTriangle size={16} />
-                        <span>{t('resetDataLabel', language)}</span>
-                      </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal">
-                        {t('resetDataDesc', language)}
-                      </p>
-                      <button
-                        onClick={handleResetAllData}
-                        className="text-xs bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl font-bold transition-all cursor-pointer border-none shadow-xs active:scale-95 duration-150 inline-flex items-center gap-1.5"
-                      >
-                        {t('resetDataButton', language)}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* 2. COLORS & EMOJIS */}
-                {activeSettingsTab === 'accents' && (
-                  <div className="space-y-5 animate-fade-in">
                     {/* Farbakzente bearbeiten */}
                     <div className="space-y-4 bg-slate-50 dark:bg-slate-950/40 p-4 rounded-2xl border border-slate-200 dark:border-slate-800/80">
                       <span className="text-xs font-semibold text-slate-450 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
@@ -3005,6 +3054,23 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                         </div>
                       </div>
                     </div>
+
+                    {/* Werkseinstellungen zurücksetzen */}
+                    <div className="bg-red-50/45 dark:bg-red-950/10 p-4 rounded-2xl border border-red-200/60 dark:border-red-900/30 space-y-3">
+                      <div className="flex items-center gap-2 text-red-655 dark:text-red-400 font-bold">
+                        <AlertTriangle size={16} />
+                        <span>{t('resetDataLabel', language)}</span>
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal">
+                        {t('resetDataDesc', language)}
+                      </p>
+                      <button
+                        onClick={handleResetAllData}
+                        className="text-xs bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl font-bold transition-all cursor-pointer border-none shadow-xs active:scale-95 duration-150 inline-flex items-center gap-1.5"
+                      >
+                        {t('resetDataButton', language)}
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -3141,6 +3207,26 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                       </h4>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                         {mt('overwriteOptionDesc')}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+
+                {/* Download Option */}
+                <button
+                  onClick={() => handlePerformMigration('download')}
+                  className="w-full text-left p-4 rounded-2xl border-2 border-slate-200 hover:border-emerald-500 dark:border-slate-800 dark:hover:border-emerald-600 bg-slate-50/40 hover:bg-emerald-50/10 dark:bg-slate-900/40 dark:hover:bg-emerald-950/5 transition-all duration-200 group cursor-pointer"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-emerald-105 dark:group-hover:bg-emerald-950 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:scale-110 transition-all">
+                      <Download size={18} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-800 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                        {mt('downloadOptionTitle')}
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        {mt('downloadOptionDesc')}
                       </p>
                     </div>
                   </div>
