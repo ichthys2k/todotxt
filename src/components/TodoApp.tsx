@@ -474,7 +474,13 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
           showToast(language === 'de' ? 'Entwicklungsmodus - keine Updateprüfung möglich.' : 'Development mode - update check not available.');
         } else if (status === 'error') {
           setCheckingUpdates(false);
-          showToast(language === 'de' ? `Fehler: ${info}` : `Error: ${info}`);
+          let friendlyInfo = info;
+          if (language === 'de' && info.includes('No published versions on GitHub')) {
+            friendlyInfo = 'Keine veröffentlichten Versionen auf GitHub gefunden.';
+          } else if (language === 'de' && info.includes('No published versions')) {
+            friendlyInfo = 'Keine veröffentlichten Versionen gefunden.';
+          }
+          showToast(language === 'de' ? `Fehler: ${friendlyInfo}` : `Error: ${info}`);
         }
       });
     }
