@@ -27,9 +27,39 @@ async function deploy() {
     const remoteDir = '/';
     const localDir = path.join(__dirname, 'dist');
     
-    console.log(`Lade Dateien aus ${localDir} direkt in das Stammverzeichnis (/) hoch...`);
+    console.log(`Lade Web-Dateien aus ${localDir} direkt in das Stammverzeichnis (/) hoch...`);
     await sftp.uploadDir(localDir, remoteDir);
-    console.log('Upload erfolgreich beendet!');
+
+    // Upload dist-desktop files
+    const localDesktopDir = path.join(__dirname, 'dist-desktop');
+    const remoteDesktopDir = '/dist-desktop';
+    console.log(`Erstelle Verzeichnis ${remoteDesktopDir} falls nicht vorhanden...`);
+    try {
+      await sftp.mkdir(remoteDesktopDir, true);
+    } catch (e) {
+      // folder might already exist
+    }
+
+    const filesToUpload = [
+      'TodoTxt-Windows-Setup.exe',
+      'TodoTxt-Windows-Portable.exe',
+      'TodoTxt-Windows-Portable.zip'
+    ];
+
+    for (const file of filesToUpload) {
+      const src = path.join(localDesktopDir, file);
+      const dst = remoteDesktopDir + '/' + file;
+      console.log(`Lade ${file} hoch...`);
+      await sftp.fastPut(src, dst);
+    }
+
+    // Upload Android APK
+    const localApk = path.join(__dirname, 'TodoTxt-Android-Release.apk');
+    const remoteApk = '/TodoTxt-Android-Release.apk';
+    console.log(`Lade ${localApk} hoch zu ${remoteApk}...`);
+    await sftp.fastPut(localApk, remoteApk);
+
+    console.log('Upload aller Versionen erfolgreich beendet!');
   } catch (err) {
     console.error('Fehler beim Deployment:', err);
   } finally {

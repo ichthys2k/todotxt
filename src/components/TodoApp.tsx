@@ -12,7 +12,7 @@ import { LocalPicker } from './LocalPicker';
 import { GitPicker } from './GitPicker';
 import { KanbanBoard } from './KanbanBoard';
 import { DashboardView } from './DashboardView';
-import { Archive, Wifi, RefreshCw, Rows, LayoutGrid, Menu, Undo, ArrowUpDown, Settings, Filter, HelpCircle, Layers, CheckCircle, Sliders, Palette, Database, Smile, Globe, LogIn, Share2, Merge, Copy, X } from 'lucide-react';
+import { Archive, Wifi, RefreshCw, Rows, LayoutGrid, Menu, Undo, ArrowUpDown, Settings, Filter, HelpCircle, Layers, CheckCircle, Sliders, Palette, Database, Smile, Globe, LogIn, Share2, Merge, Copy, X, AlertTriangle } from 'lucide-react';
 import { getTheme, setTheme } from '../services/themeService';
 import { getDensity, setDensity, applyDensity, type Density } from '../services/densityService';
 import { HelpModal } from './HelpModal';
@@ -785,6 +785,25 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
       }
     } else {
       setNotificationsEnabled(false);
+    }
+  };
+
+  const handleResetAllData = () => {
+    if (window.confirm(t('resetDataConfirm', language))) {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('todo_txt_')) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      try {
+        window.indexedDB.deleteDatabase('todo_txt_file_handles');
+      } catch (e) {
+        console.error('Failed to delete indexedDB', e);
+      }
+      window.location.reload();
     }
   };
 
@@ -2667,6 +2686,23 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                       <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal">
                         {t('notificationsDesc', language)}
                       </p>
+                    </div>
+
+                    {/* Werkseinstellungen zurücksetzen */}
+                    <div className="bg-red-50/45 dark:bg-red-950/10 p-4 rounded-2xl border border-red-200/60 dark:border-red-900/30 space-y-3">
+                      <div className="flex items-center gap-2 text-red-655 dark:text-red-400 font-bold">
+                        <AlertTriangle size={16} />
+                        <span>{t('resetDataLabel', language)}</span>
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal">
+                        {t('resetDataDesc', language)}
+                      </p>
+                      <button
+                        onClick={handleResetAllData}
+                        className="text-xs bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl font-bold transition-all cursor-pointer border-none shadow-xs active:scale-95 duration-150 inline-flex items-center gap-1.5"
+                      >
+                        {t('resetDataButton', language)}
+                      </button>
                     </div>
                   </div>
                 )}
