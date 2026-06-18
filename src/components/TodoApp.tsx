@@ -846,6 +846,11 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
 
   const handleResetAllData = () => {
     if (window.confirm(t('resetDataConfirm', language))) {
+      // Clear react states first
+      setTasks([]);
+      setArchivedTasks([]);
+
+      // Clear localStorage
       const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -854,11 +859,19 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
         }
       }
       keysToRemove.forEach(key => localStorage.removeItem(key));
+      
+      // Delete file handles from IndexedDB
       try {
         window.indexedDB.deleteDatabase('todo_txt_file_handles');
       } catch (e) {
         console.error('Failed to delete indexedDB', e);
       }
+      
+      // Notify Electron main process to clear saved file-paths.json if running in Electron
+      if (isElectron && window.electronAPI?.setPaths) {
+        window.electronAPI.setPaths(null, null);
+      }
+
       window.location.reload();
     }
   };
