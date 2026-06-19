@@ -340,9 +340,14 @@ app.on('ready', () => {
       buttons: ['Jetzt neu starten', 'Später']
     }).then((result) => {
       if (result.response === 0) {
+        isQuitting = true;
         autoUpdater.quitAndInstall();
       }
     });
+  });
+
+  autoUpdater.on('before-quit-for-update', () => {
+    isQuitting = true;
   });
 
   if (app.isPackaged) {

@@ -17,6 +17,7 @@ interface TodoListProps {
   knownProjects: string[];
   knownContexts: string[];
   showCreationDate: boolean;
+  hideTaskIds?: boolean;
   groupBy: 'none' | 'project' | 'context' | 'priority' | 'due' | 'assignee';
   sortBy: 'priority' | 'due' | 'creation' | 'alphabetical';
   projectPreset: string;
@@ -66,6 +67,7 @@ export const TodoList = ({
   knownProjects,
   knownContexts,
   showCreationDate,
+  hideTaskIds = true,
   groupBy,
   sortBy,
   projectPreset,
@@ -570,6 +572,7 @@ export const TodoList = ({
                   knownContexts={knownContexts}
                   knownAssignees={knownAssignees}
                   showCreationDate={showCreationDate}
+                  hideTaskIds={hideTaskIds}
                   projectPreset={projectPreset}
                   contextPreset={contextPreset}
                   datePreset={datePreset}

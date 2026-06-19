@@ -6,8 +6,8 @@ import { t } from '../services/translationService';
 import type { Language } from '../services/translationService';
 
 interface SidebarProps {
-  currentView: 'todo' | 'archive' | 'dashboard';
-  onViewChange: (view: 'todo' | 'archive' | 'dashboard') => void;
+  currentView: 'todo' | 'archive' | 'dashboard' | 'editor';
+  onViewChange: (view: 'todo' | 'archive' | 'dashboard' | 'editor') => void;
   selectedProject: string | null;
   selectedContext: string | null;
   onSelectProject: (project: string | null) => void;
@@ -495,7 +495,7 @@ export const Sidebar = ({
                 }}
                 className={`w-full flex items-center justify-between rounded-md text-xs transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
                   currentView === 'dashboard'
-                    ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-semibold border border-indigo-100/50 dark:border-indigo-950/65' 
+                    ? 'bg-indigo-50 dark:bg-indigo-955/40 text-indigo-600 dark:text-indigo-400 font-semibold border border-indigo-100/50 dark:border-indigo-950/65' 
                     : 'text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800'
                 }`}
                 style={{
@@ -508,6 +508,30 @@ export const Sidebar = ({
                 <span className="flex items-center gap-2 truncate">
                   <BarChart3 size={14} className="text-indigo-500" />
                   <span className="truncate">{t('dashboardTitle', language).split(' ').pop()}</span>
+                </span>
+              </button>
+            </li>
+
+            <li>
+              <button
+                onClick={() => {
+                  onViewChange('editor');
+                }}
+                className={`w-full flex items-center justify-between rounded-md text-xs transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  currentView === 'editor'
+                    ? 'bg-indigo-50 dark:bg-indigo-955/40 text-indigo-600 dark:text-indigo-400 font-semibold border border-indigo-100/50 dark:border-indigo-950/65' 
+                    : 'text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800'
+                }`}
+                style={{
+                  paddingTop: 'var(--density-sidebar-item-py)',
+                  paddingBottom: 'var(--density-sidebar-item-py)',
+                  paddingLeft: 'var(--density-sidebar-item-px)',
+                  paddingRight: 'var(--density-sidebar-item-px)',
+                }}
+              >
+                <span className="flex items-center gap-2 truncate">
+                  <FileText size={14} className="text-indigo-500" />
+                  <span className="truncate">{language === 'de' ? 'Text-Editor' : 'Text Editor'}</span>
                 </span>
               </button>
             </li>

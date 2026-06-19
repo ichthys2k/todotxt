@@ -12,6 +12,7 @@ import { LocalPicker } from './LocalPicker';
 import { GitPicker } from './GitPicker';
 import { KanbanBoard } from './KanbanBoard';
 import { DashboardView } from './DashboardView';
+import { RawEditorView } from './RawEditorView';
 import { Archive, Wifi, RefreshCw, Rows, LayoutGrid, Menu, Undo, ArrowUpDown, Settings, Filter, HelpCircle, Layers, CheckCircle, Sliders, Palette, Database, Smile, Globe, LogIn, Share2, Merge, Copy, X, AlertTriangle, Download } from 'lucide-react';
 import { getTheme, setTheme } from '../services/themeService';
 import { getDensity, setDensity, applyDensity, type Density } from '../services/densityService';
@@ -373,11 +374,12 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
 
   const [archiving, setArchiving] = useState(false);
   const [isPickingArchive, setIsPickingArchive] = useState(false);
-  const [currentView, setCurrentView] = useState<'todo' | 'archive' | 'dashboard'>(() => {
+  const [currentView, setCurrentView] = useState<'todo' | 'archive' | 'dashboard' | 'editor'>(() => {
     const params = new URLSearchParams(window.location.search);
     const viewParam = params.get('view');
     if (viewParam === 'dashboard') return 'dashboard';
     if (viewParam === 'archive') return 'archive';
+    if (viewParam === 'editor') return 'editor';
     return 'todo';
   });
   const [activeSmartView, setActiveSmartView] = useState<SmartViewType>(null);
@@ -400,9 +402,9 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
   };
 
   // Undo history state
-  const [history, setHistory] = useState<{ tasks: TodoTask[]; archivedTasks: TodoTask[]; view: 'todo' | 'archive' | 'dashboard' }[]>([]);
+  const [history, setHistory] = useState<{ tasks: TodoTask[]; archivedTasks: TodoTask[]; view: 'todo' | 'archive' | 'dashboard' | 'editor' }[]>([]);
 
-  const pushToHistory = (currentTasks: TodoTask[], currentArchivedTasks: TodoTask[], view: 'todo' | 'archive' | 'dashboard') => {
+  const pushToHistory = (currentTasks: TodoTask[], currentArchivedTasks: TodoTask[], view: 'todo' | 'archive' | 'dashboard' | 'editor') => {
     setHistory(prev => {
       const next = [...prev, { tasks: currentTasks, archivedTasks: currentArchivedTasks, view }];
       if (next.length > 20) {
@@ -587,6 +589,13 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
   const [hideFutureDue, setHideFutureDue] = useState<boolean>(() => {
     return localStorage.getItem('todo_txt_hide_future_due') === 'true';
   });
+  const [hideTaskIds, setHideTaskIds] = useState<boolean>(() => {
+    return localStorage.getItem('todo_txt_hide_task_ids') !== 'false'; // default true
+  });
+
+  useEffect(() => {
+    localStorage.setItem('todo_txt_hide_task_ids', hideTaskIds ? 'true' : 'false');
+  }, [hideTaskIds]);
 
   // Selected Attributes Filters
   const [selectedDue, setSelectedDue] = useState<string | null>(null);
@@ -923,6 +932,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
             if (typeof s.hideHidden === 'boolean') setHideHidden(s.hideHidden);
             if (typeof s.hideFutureThreshold === 'boolean') setHideFutureThreshold(s.hideFutureThreshold);
             if (typeof s.hideFutureDue === 'boolean') setHideFutureDue(s.hideFutureDue);
+            if (typeof s.hideTaskIds === 'boolean') setHideTaskIds(s.hideTaskIds);
             if (s.sortBy) setSortBy(s.sortBy);
             if (s.groupBy) setGroupBy(s.groupBy);
             if (s.layoutMode) setLayoutMode(s.layoutMode);
@@ -1290,6 +1300,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
         hideHidden,
         hideFutureThreshold,
         hideFutureDue,
+        hideTaskIds,
         sortBy,
         groupBy,
         layoutMode,
@@ -1319,6 +1330,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
     hideHidden,
     hideFutureThreshold,
     hideFutureDue,
+    hideTaskIds,
     sortBy,
     groupBy,
     layoutMode,
@@ -2381,7 +2393,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
           onToggleAutoAddCreationDate={setAutoAddCreationDate}
           currentTheme={currentTheme}
           onThemeChange={handleThemeChange}
-          storageMode={storageMode}
+           storageMode={storageMode}
           onSwitchFile={handleSwitchFile}
           contextEmojis={contextEmojis}
           onUpdateContextEmoji={(ctx, emoji) => setContextEmojis(prev => ({ ...prev, [ctx]: emoji }))}
@@ -2392,7 +2404,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
           onSync={handleSync}
           lastSyncTime={lastSyncTime}
           formatSyncTime={formatSyncTime}
-           selectedDue={selectedDue}
+          selectedDue={selectedDue}
           onSelectDue={(due) => {
             setSelectedDue(due);
           }}
@@ -2423,8 +2435,8 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
         <div className={`flex-1 flex flex-col ${layoutMode === 'kanban' && currentView === 'todo' ? 'max-w-none px-4 md:px-6 overflow-hidden' : 'max-w-4xl mx-auto overflow-y-auto'} w-full p-4 md:p-6 relative`}>
           
           {error && (
-            <div className="mb-4 p-4 rounded-lg bg-red-100 dark:bg-red-900/50 border border-red-200 dark:border-red-500/50 text-red-700 dark:text-red-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm font-sans">
-              <span className="font-medium">
+            <div className="mb-4 p-4 rounded-lg bg-red-100 dark:bg-red-900/50 border border-red-200 dark:border-red-500/50 text-red-700 dark:text-red-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm font-sans font-medium">
+              <span>
                 {error === 'FILE_PERMISSION_REQUIRED' || error === 'ARCHIVE_FILE_PERMISSION_REQUIRED'
                   ? t('filePermissionRequiredToast', language)
                   : error}
@@ -2438,7 +2450,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                       loadTasks();
                     }
                   }}
-                  className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-sm cursor-pointer transition-colors"
+                  className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs cursor-pointer transition-colors"
                 >
                   {t('grantPermissionBtn', language)}
                 </button>
@@ -2446,7 +2458,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
               {googleTokenExpired && (
                 <button
                   onClick={() => googleRenewToken()}
-                  className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors"
+                  className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer transition-colors"
                 >
                   <RefreshCw size={14} />
                   Sitzung erneuern
@@ -2458,21 +2470,21 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
           <div className={`${layoutMode === 'kanban' && currentView === 'todo' ? 'mt-2 mb-2' : 'mt-2 mb-4'} flex justify-between items-center flex-shrink-0`}>
             <div className="flex items-center gap-3">
               <h2 className="text-xl font-bold">
-                {currentView === 'todo' ? t('tasksTitle', language) : currentView === 'archive' ? t('archiveTitle', language) : t('dashboardTitle', language)}
+                {currentView === 'todo' ? t('tasksTitle', language) : currentView === 'archive' ? t('archiveTitle', language) : currentView === 'editor' ? (language === 'de' ? 'Raw-Text Editor' : 'Raw Text Editor') : t('dashboardTitle', language)}
               </h2>
               
               {currentView === 'todo' && (
-                <div className="flex bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-0.5">
+                <div className="flex bg-slate-100 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-lg p-0.5">
                   <button
                     onClick={() => setLayoutMode('list')}
-                    className={`p-1 rounded transition-colors cursor-pointer ${layoutMode === 'list' ? 'bg-indigo-650 text-white shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                    className={`p-1 rounded transition-colors cursor-pointer ${layoutMode === 'list' ? 'bg-indigo-650 text-white shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-205'}`}
                     title="Listenansicht"
                   >
                     <Rows size={13} />
                   </button>
                   <button
                     onClick={() => setLayoutMode('kanban')}
-                    className={`p-1 rounded transition-colors cursor-pointer ${layoutMode === 'kanban' ? 'bg-indigo-650 text-white shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                    className={`p-1 rounded transition-colors cursor-pointer ${layoutMode === 'kanban' ? 'bg-indigo-650 text-white shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-205'}`}
                     title="Kanban-Board"
                   >
                     <LayoutGrid size={13} />
@@ -2481,7 +2493,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
               )}
             </div>
 
-            {currentView !== 'dashboard' && (
+            {currentView !== 'dashboard' && currentView !== 'editor' && (
               <div className="flex items-center gap-2">
                 {history.length > 0 && (
                   <button 
@@ -2493,7 +2505,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                   </button>
                 )}
 
-                <div className="relative flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 p-2 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer" title={`${t('sortLabel', language)}: ${sortBy === 'default' ? t('sortDefault', language) : sortBy === 'due' ? t('sortDue', language) : sortBy === 'priority' ? t('sortPriority', language) : sortBy === 'creation' ? t('sortCreation', language) : t('sortAlphabetical', language)}`}>
+                <div className="relative flex items-center justify-center bg-slate-105 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 p-2 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer" title={`${t('sortLabel', language)}: ${sortBy === 'default' ? t('sortDefault', language) : sortBy === 'due' ? t('sortDue', language) : sortBy === 'priority' ? t('sortPriority', language) : sortBy === 'creation' ? t('sortCreation', language) : t('sortAlphabetical', language)}`}>
                   <ArrowUpDown size={15} className="text-slate-500" />
                   <select
                     value={sortBy}
@@ -2508,7 +2520,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                   </select>
                 </div>
 
-                <div className="relative flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 p-2 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer" title={`${t('groupLabel', language)}: ${groupBy === 'none' ? t('groupNone', language) : groupBy === 'due' ? t('groupDue', language) : groupBy === 'priority' ? t('groupPriority', language) : groupBy === 'project' ? t('groupProject', language) : groupBy === 'context' ? t('groupContext', language) : t('groupAssignee', language)}`}>
+                <div className="relative flex items-center justify-center bg-slate-105 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 p-2 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer" title={`${t('groupLabel', language)}: ${groupBy === 'none' ? t('groupNone', language) : groupBy === 'due' ? t('groupDue', language) : groupBy === 'priority' ? t('groupPriority', language) : groupBy === 'project' ? t('groupProject', language) : groupBy === 'context' ? t('groupContext', language) : t('groupAssignee', language)}`}>
                   <Layers size={15} className="text-slate-500" />
                   <select
                     value={groupBy}
@@ -2536,10 +2548,28 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                 )}
               </div>
             )}
+
           </div>
           
-          <div className={`transition-opacity ${loading ? 'opacity-50 pointer-events-none' : ''} ${layoutMode === 'kanban' && currentView === 'todo' ? 'flex-1 min-h-0 flex flex-col' : 'h-full'}`}>
-            {currentView === 'dashboard' ? (
+          <div className={`transition-opacity ${loading ? 'opacity-50 pointer-events-none' : ''} ${(layoutMode === 'kanban' && currentView === 'todo') || currentView === 'editor' ? 'flex-1 min-h-0 flex flex-col' : 'h-full'}`}>
+            {currentView === 'editor' ? (
+              <RawEditorView 
+                todoContent={serializeTodos(tasks)}
+                archiveContent={serializeTodos(archivedTasks)}
+                onSaveTodo={async (newContent) => {
+                  const parsed = parseTodos(newContent);
+                  await saveTasks(parsed);
+                }}
+                onSaveArchive={async (newContent) => {
+                  const parsed = parseTodos(newContent);
+                  setArchivedTasks(parsed);
+                  await saveArchiveContent(storageMode, newContent);
+                }}
+                language={language}
+                onSync={!isLocalMode ? handleSync : undefined}
+                syncing={syncing}
+              />
+            ) : currentView === 'dashboard' ? (
               <DashboardView 
                 tasks={tasks}
                 archivedTasks={archivedTasks}
@@ -2559,6 +2589,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                 knownContexts={allContexts}
                 knownAssignees={allAssignees}
                 showCreationDate={showCreationDate}
+                hideTaskIds={hideTaskIds}
                 groupBy={effectiveGroupBy}
                 projectPreset={projectPreset}
                 contextPreset={contextPreset}
@@ -2580,6 +2611,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                 knownContexts={allContexts}
                 knownAssignees={allAssignees}
                 showCreationDate={showCreationDate}
+                hideTaskIds={hideTaskIds}
                 groupBy={effectiveGroupBy}
                 sortBy={effectiveSortBy}
                 projectPreset={projectPreset}
@@ -3164,6 +3196,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                           { key: 'hideHidden', checked: hideHidden, onChange: (val: boolean) => setHideHidden(val), label: t('hideHidden', language), tooltip: 'Aufgaben mit h:1 ausblenden' },
                           { key: 'hideFutureThreshold', checked: hideFutureThreshold, onChange: (val: boolean) => setHideFutureThreshold(val), label: t('hideFutureThreshold', language), tooltip: 'Zukünftige Startdaten (t:YYYY-MM-DD) ausblenden' },
                           { key: 'hideFutureDue', checked: hideFutureDue, onChange: (val: boolean) => setHideFutureDue(val), label: t('hideFutureDue', language), tooltip: 'Zukünftige Fälligkeiten (due:YYYY-MM-DD) ausblenden' },
+                          { key: 'hideTaskIds', checked: hideTaskIds, onChange: (val: boolean) => setHideTaskIds(val), label: t('hideTaskIds', language), tooltip: '' },
                         ].map((fItem) => (
                           <label key={fItem.key} className="flex items-center gap-3 bg-white dark:bg-slate-900/50 hover:bg-slate-100/50 dark:hover:bg-slate-850/50 p-3.5 rounded-xl border border-slate-200/40 dark:border-slate-800/40 cursor-pointer select-none transition-colors" title={fItem.tooltip}>
                             <input

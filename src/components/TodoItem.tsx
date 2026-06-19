@@ -28,6 +28,7 @@ interface TodoItemProps {
   activeSmartView?: string | null;
   hiddenTags?: string[];
   language: Language;
+  hideTaskIds?: boolean;
 }
 
 interface PriorityDropdownProps {
@@ -302,7 +303,8 @@ export const TodoItem = ({
   contextEmojis = {},
   activeSmartView,
   hiddenTags = [],
-  language
+  language,
+  hideTaskIds = true
 }: TodoItemProps & { knownAssignees: string[] }) => {
   const projectStyles = PROJECT_COLOR_PRESETS[projectPreset] || PROJECT_COLOR_PRESETS['purple'];
   const contextStyles = CONTEXT_COLOR_PRESETS[contextPreset] || CONTEXT_COLOR_PRESETS['emerald'];
@@ -439,6 +441,11 @@ export const TodoItem = ({
   const renderDescription = (text: string, isCompleted: boolean) => {
     const words = text.split(/(\s+)/);
     return words.map((word, index) => {
+      // Hide task IDs in UI if configured
+      if (hideTaskIds && word.trim().startsWith('id:') && word.trim().length > 3) {
+        return null;
+      }
+
       // Hidden tags filter
       if (hiddenTags.length > 0) {
         const lowerWord = word.trim().toLowerCase();

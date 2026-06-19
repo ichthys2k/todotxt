@@ -18,6 +18,7 @@ interface KanbanBoardProps {
   knownProjects: string[];
   knownContexts: string[];
   showCreationDate: boolean;
+  hideTaskIds?: boolean;
   groupBy: 'none' | 'project' | 'context' | 'priority' | 'due' | 'assignee';
   projectPreset: string;
   contextPreset: string;
@@ -40,6 +41,7 @@ export const KanbanBoard = ({
   knownProjects,
   knownContexts,
   showCreationDate,
+  hideTaskIds = true,
   groupBy,
   projectPreset,
   contextPreset,
@@ -425,6 +427,7 @@ export const KanbanBoard = ({
                     knownContexts={knownContexts}
                     knownAssignees={knownAssignees}
                     showCreationDate={showCreationDate}
+                    hideTaskIds={hideTaskIds}
                     projectPreset={projectPreset}
                     contextPreset={contextPreset}
                     datePreset={datePreset}
