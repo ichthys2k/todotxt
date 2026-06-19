@@ -47,6 +47,27 @@ export const Login = ({ onLocalMode, onWebDavMode, onGitMode, onGoogleDriveMode,
 
   const isElectron = typeof window !== 'undefined' && window.navigator.userAgent.toLowerCase().includes('electron');
 
+  const handleGoogleLogin = async () => {
+    // Only import if we are running native
+    if (typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.()) {
+      try {
+        setLoading(true);
+        setError(null);
+        // Ensure GoogleAuth is dynamically imported or handled correctly if it's imported globally
+        const { GoogleAuth } = await import('@codetrix-studio/capacitor-google-auth');
+        const user = await GoogleAuth.signIn();
+        onGoogleDriveMode(user.authentication.accessToken);
+      } catch (err: any) {
+        console.error('Native Google Login Failed:', err);
+        setError('Google Anmeldung fehlgeschlagen.');
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      googleLogin();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4">
       <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-8 text-center relative">
@@ -89,7 +110,7 @@ export const Login = ({ onLocalMode, onWebDavMode, onGitMode, onGoogleDriveMode,
 
             {!isElectron && (
               <button 
-                onClick={() => googleLogin()}
+                onClick={handleGoogleLogin}
                 className="w-full relative flex items-center justify-center gap-3 bg-white text-slate-900 hover:bg-slate-50 py-3.5 px-4 rounded-xl font-medium transition-all duration-200 group border border-slate-200 dark:border-transparent dark:hover:bg-slate-100 cursor-pointer mt-3"
               >
                 <svg className="w-5 h-5" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">

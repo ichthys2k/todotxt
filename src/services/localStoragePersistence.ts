@@ -2,12 +2,55 @@ import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 
 const BACKUP_FILE = 'localstorage_backup.json';
+const IDB_DB_NAME = 'TodoTxtBackupDB';
+const IDB_STORE_NAME = 'keyval';
 
 // Save helper with debouncing
 let saveTimeout: any = null;
 
+const getDB = (): Promise<IDBDatabase> => {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(IDB_DB_NAME, 1);
+    request.onupgradeneeded = (e: any) => {
+      e.target.result.createObjectStore(IDB_STORE_NAME);
+    };
+    request.onsuccess = (e: any) => resolve(e.target.result);
+    request.onerror = () => reject(request.error);
+  });
+};
+
+const saveToIDB = async (data: string) => {
+  try {
+    const db = await getDB();
+    return new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE_NAME, 'readwrite');
+      const store = tx.objectStore(IDB_STORE_NAME);
+      const request = store.put(data, 'backup');
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  } catch (e) {
+    console.error('IDB save failed:', e);
+  }
+};
+
+const loadFromIDB = async (): Promise<string | null> => {
+  try {
+    const db = await getDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE_NAME, 'readonly');
+      const store = tx.objectStore(IDB_STORE_NAME);
+      const request = store.get('backup');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  } catch (e) {
+    console.error('IDB load failed:', e);
+    return null;
+  }
+};
+
 const saveToDisk = async () => {
-  if (!Capacitor.isNativePlatform()) return;
   try {
     const data: Record<string, string> = {};
     for (let i = 0; i < localStorage.length; i++) {
@@ -17,14 +60,20 @@ const saveToDisk = async () => {
       }
     }
     
-    await Filesystem.writeFile({
-      path: BACKUP_FILE,
-      data: JSON.stringify(data),
-      directory: Directory.Data,
-      encoding: Encoding.UTF8
-    });
+    const jsonStr = JSON.stringify(data);
+
+    if (Capacitor.isNativePlatform()) {
+      await Filesystem.writeFile({
+        path: BACKUP_FILE,
+        data: jsonStr,
+        directory: Directory.Data,
+        encoding: Encoding.UTF8
+      });
+    } else {
+      await saveToIDB(jsonStr);
+    }
   } catch (error) {
-    console.error('Failed to save localStorage backup to native storage:', error);
+    console.error('Failed to save localStorage backup:', error);
   }
 };
 
@@ -34,30 +83,37 @@ const queueSave = () => {
 };
 
 export const restoreLocalStorageBackup = async (): Promise<void> => {
-  if (!Capacitor.isNativePlatform()) return;
   try {
-    const result = await Filesystem.readFile({
-      path: BACKUP_FILE,
-      directory: Directory.Data,
-      encoding: Encoding.UTF8
-    });
+    let jsonStr: string | null = null;
     
-    if (result.data) {
-      const data = JSON.parse(result.data as string);
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const result = await Filesystem.readFile({
+          path: BACKUP_FILE,
+          directory: Directory.Data,
+          encoding: Encoding.UTF8
+        });
+        jsonStr = result.data as string;
+      } catch (e) {
+        console.log('No native backup found to restore');
+      }
+    } else {
+      jsonStr = await loadFromIDB();
+    }
+    
+    if (jsonStr) {
+      const data = JSON.parse(jsonStr);
       Object.keys(data).forEach((key) => {
         localStorage.setItem(key, data[key]);
       });
-      console.log('Restored localStorage from native backup successfully');
+      console.log('Restored localStorage from backup successfully');
     }
   } catch (error) {
-    // File might not exist on first start, which is fine
-    console.log('No localStorage backup found to restore or read failed');
+    console.log('No localStorage backup found or read failed');
   }
 };
 
 export const initLocalStorageBackup = () => {
-  if (!Capacitor.isNativePlatform()) return;
-
   const originalSetItem = window.localStorage.setItem;
   const originalRemoveItem = window.localStorage.removeItem;
   const originalClear = window.localStorage.clear;

@@ -114,7 +114,23 @@ export const fetchWebDavFile = async (fileName: string): Promise<string> => {
   }
 };
 
-export const saveWebDavFile = async (fileName: string, content: string): Promise<void> => {
+export const saveWebDavFile = async (fileName: string, content: string): Promise<string> => {
+  let finalContent = content;
+  try {
+    const remoteContent = await fetchWebDavFile(fileName);
+    if (remoteContent !== null && remoteContent !== undefined) {
+      if (fileName === 'todo.config.json') {
+        const { mergeConfigContents } = await import('../../utils/todoMerger');
+        finalContent = mergeConfigContents(content, remoteContent);
+      } else {
+        const { mergeTodoContents } = await import('../../utils/todoMerger');
+        finalContent = mergeTodoContents(content, remoteContent);
+      }
+    }
+  } catch (e) {
+    console.warn(`Could not fetch ${fileName} for merge:`, e);
+  }
+
   const { url, headers } = getWebDavHeaders();
   if (!url) throw new Error('WEBDAV_NOT_CONFIGURED');
   const storedPath = getWebDavPath();
@@ -125,7 +141,7 @@ export const saveWebDavFile = async (fileName: string, content: string): Promise
     baseUrl = url;
   }
   const fileUrl = baseUrl.endsWith('/') ? baseUrl + fileName : baseUrl + '/' + fileName;
-  const { fetchUrl, fetchOpts } = buildWebDavFetchArgs(fileUrl, 'PUT', headers, content);
+  const { fetchUrl, fetchOpts } = buildWebDavFetchArgs(fileUrl, 'PUT', headers, finalContent);
   try {
     const res = await fetch(fetchUrl, fetchOpts);
     if (!res.ok) {
@@ -134,6 +150,7 @@ export const saveWebDavFile = async (fileName: string, content: string): Promise
       }
       throw new Error(`WEBDAV_ERROR:${res.status}`);
     }
+    return finalContent;
   } catch (err: any) {
     if (err.message?.startsWith('WEBDAV_')) throw err;
     throw new Error('WEBDAV_CONNECTION_FAILED');
@@ -284,8 +301,7 @@ export class WebDavSyncProvider implements SyncProvider {
   }
 
   async saveTodoContent(content: string): Promise<string> {
-    await saveWebDavFile('todo.txt', content);
-    return content;
+    return await saveWebDavFile('todo.txt', content);
   }
 
   async fetchArchiveContent(): Promise<string> {
@@ -293,8 +309,7 @@ export class WebDavSyncProvider implements SyncProvider {
   }
 
   async saveArchiveContent(content: string): Promise<string> {
-    await saveWebDavFile('archive.txt', content);
-    return content;
+    return await saveWebDavFile('archive.txt', content);
   }
 
   async fetchConfigContent(): Promise<string> {
@@ -302,8 +317,7 @@ export class WebDavSyncProvider implements SyncProvider {
   }
 
   async saveConfigContent(content: string): Promise<string> {
-    await saveWebDavFile('todo.config.json', content);
-    return content;
+    return await saveWebDavFile('todo.config.json', content);
   }
 
   async syncPendingChanges(): Promise<{ todoSynced: boolean; archiveSynced: boolean; configSynced: boolean }> {

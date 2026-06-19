@@ -91,6 +91,50 @@ export class OneDriveSyncProvider implements SyncProvider {
     }
   }
 
+  private async mergeAndUpload(
+    token: string,
+    url: string,
+    localContent: string,
+    mergeStrategy: 'todo' | 'archive' | 'config'
+  ): Promise<string> {
+    let finalContent = localContent;
+    try {
+      const getResponse = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (getResponse.ok) {
+        const remoteContent = await getResponse.text();
+        if (mergeStrategy === 'config') {
+          const { mergeConfigContents } = await import('../../utils/todoMerger');
+          finalContent = mergeConfigContents(localContent, remoteContent);
+        } else {
+          const { mergeTodoContents } = await import('../../utils/todoMerger');
+          finalContent = mergeTodoContents(localContent, remoteContent);
+        }
+      }
+    } catch (e) {
+      console.warn("Fehler beim Herunterladen für Merge:", e);
+    }
+
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': mergeStrategy === 'config' ? 'application/json' : 'text/plain'
+      },
+      body: finalContent
+    });
+
+    if (!response.ok) {
+      throw new Error(`Fehler beim Speichern. Status: ${response.status}`);
+    }
+    
+    // Wir geben response.json() zurück, falls vorhanden, sonst null.
+    // Das wird für Archive (neu erstellte Datei) gebraucht.
+    return finalContent;
+  }
+
+
   async saveTodoContent(content: string): Promise<string> {
     const fileId = getSelectedFileId();
     if (!fileId) throw new Error('NO_FILE_SELECTED');
@@ -109,19 +153,12 @@ export class OneDriveSyncProvider implements SyncProvider {
         return content;
       }
 
-      const response = await fetch(`https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/content`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'text/plain'
-        },
-        body: content
-      });
-
-      if (!response.ok) {
-        throw new Error(`Fehler beim Speichern in OneDrive. Status: ${response.status}`);
-      }
+      const url = `https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/content`;
+      const finalContent = await this.mergeAndUpload(token, url, content, 'todo');
+      
+      localStorage.setItem(ONEDRIVE_CACHE_TODO_KEY, finalContent);
       localStorage.removeItem(PENDING_SYNC_TODO_KEY);
+      return finalContent;
     } catch (error: any) {
       if (error.message === 'NO_FILE_SELECTED') throw error;
       console.warn('Speichern in OneDrive fehlgeschlagen. Offline-Flag gesetzt:', error);
@@ -202,23 +239,27 @@ export class OneDriveSyncProvider implements SyncProvider {
         return content;
       }
 
-      const response = await fetch(putUrl, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'text/plain'
-        },
-        body: content
-      });
-
-      if (!response.ok) throw new Error(`Fehler beim Speichern. Status: ${response.status}`);
+      const finalContent = await this.mergeAndUpload(token, putUrl, content, 'archive');
       
+      localStorage.setItem(ONEDRIVE_CACHE_ARCHIVE_KEY, finalContent);
       localStorage.removeItem(PENDING_SYNC_ARCHIVE_KEY);
 
       if (!archiveFileId) {
-        const data = await response.json();
-        setSelectedArchiveFile(data.id, data.name);
+        // Falls die Datei neu angelegt wurde, brauchen wir die FileId.
+        // Dafür machen wir einen kurzen Abruf der Metadaten.
+        try {
+          const metaResponse = await fetch(putUrl.replace('/content', ''), {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (metaResponse.ok) {
+            const data = await metaResponse.json();
+            setSelectedArchiveFile(data.id, data.name);
+          }
+        } catch(e) {
+          console.warn("Konnte Archive File ID nicht aktualisieren", e);
+        }
       }
+      return finalContent;
     } catch (error: any) {
       console.warn('Speichern des Archivs fehlgeschlagen. Offline-Flag gesetzt:', error);
       localStorage.setItem(PENDING_SYNC_ARCHIVE_KEY, 'true');
@@ -291,19 +332,11 @@ export class OneDriveSyncProvider implements SyncProvider {
         return content;
       }
 
-      const response = await fetch(putUrl, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: content
-      });
-
-      if (!response.ok) {
-        throw new Error(`Fehler beim Speichern der Konfiguration in OneDrive. Status: ${response.status}`);
-      }
+      const finalContent = await this.mergeAndUpload(token, putUrl, content, 'config');
+      
+      localStorage.setItem(ONEDRIVE_CACHE_CONFIG_KEY, finalContent);
       localStorage.removeItem(PENDING_SYNC_CONFIG_KEY);
+      return finalContent;
     } catch (error: any) {
       console.warn('Speichern der Konfiguration fehlgeschlagen. Offline-Flag gesetzt:', error);
       localStorage.setItem(PENDING_SYNC_CONFIG_KEY, 'true');
@@ -330,18 +363,11 @@ export class OneDriveSyncProvider implements SyncProvider {
           if (fileId) {
             const token = await getGraphAccessToken();
             if (token) {
-              const response = await fetch(`https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/content`, {
-                method: 'PUT',
-                headers: {
-                  'Authorization': `Bearer ${token}`,
-                  'Content-Type': 'text/plain'
-                },
-                body: content
-              });
-              if (response.ok) {
-                localStorage.removeItem(PENDING_SYNC_TODO_KEY);
-                todoSynced = true;
-              }
+              const url = `https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/content`;
+              const finalContent = await this.mergeAndUpload(token, url, content, 'todo');
+              localStorage.setItem(ONEDRIVE_CACHE_TODO_KEY, finalContent);
+              localStorage.removeItem(PENDING_SYNC_TODO_KEY);
+              todoSynced = true;
             }
           }
         } catch (err) {
@@ -366,21 +392,21 @@ export class OneDriveSyncProvider implements SyncProvider {
                     ? `https://graph.microsoft.com/v1.0/me/drive/root:/${archiveFileName}:/content`
                     : `https://graph.microsoft.com/v1.0/me/drive/items/${folderId}:/${archiveFileName}:/content`);
                     
-              const response = await fetch(putUrl, {
-                method: 'PUT',
-                headers: {
-                  'Authorization': `Bearer ${token}`,
-                  'Content-Type': 'text/plain'
-                },
-                body: content
-              });
-              if (response.ok) {
-                localStorage.removeItem(PENDING_SYNC_ARCHIVE_KEY);
-                archiveSynced = true;
-                if (!archiveFileId) {
-                  const data = await response.json();
-                  setSelectedArchiveFile(data.id, data.name);
-                }
+              const finalContent = await this.mergeAndUpload(token, putUrl, content, 'archive');
+              localStorage.setItem(ONEDRIVE_CACHE_ARCHIVE_KEY, finalContent);
+              localStorage.removeItem(PENDING_SYNC_ARCHIVE_KEY);
+              archiveSynced = true;
+              
+              if (!archiveFileId) {
+                try {
+                  const metaResponse = await fetch(putUrl.replace('/content', ''), {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                  });
+                  if (metaResponse.ok) {
+                    const data = await metaResponse.json();
+                    setSelectedArchiveFile(data.id, data.name);
+                  }
+                } catch(e) {}
               }
             }
           }
@@ -403,18 +429,10 @@ export class OneDriveSyncProvider implements SyncProvider {
                 ? `https://graph.microsoft.com/v1.0/me/drive/root:/${configFileName}:/content`
                 : `https://graph.microsoft.com/v1.0/me/drive/items/${folderId}:/${configFileName}:/content`;
               
-              const response = await fetch(putUrl, {
-                method: 'PUT',
-                headers: {
-                  'Authorization': `Bearer ${token}`,
-                  'Content-Type': 'application/json'
-                },
-                body: content
-              });
-              if (response.ok) {
-                localStorage.removeItem(PENDING_SYNC_CONFIG_KEY);
-                configSynced = true;
-              }
+              const finalContent = await this.mergeAndUpload(token, putUrl, content, 'config');
+              localStorage.setItem(ONEDRIVE_CACHE_CONFIG_KEY, finalContent);
+              localStorage.removeItem(PENDING_SYNC_CONFIG_KEY);
+              configSynced = true;
             }
           }
         } catch (err) {

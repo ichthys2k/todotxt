@@ -245,7 +245,8 @@ export const translations = {
     onboardingGitHub: 'Windows App (GitHub)',
     sampleTask1: '(A) Willkommen in der App! Erledige diese Aufgabe durch Klicken auf das Kästchen links',
     sampleTask2: 'Aufgaben strukturieren mit +Projekten und @Kontexten',
-    sampleTask3: 'Füge ein Fälligkeitsdatum hinzu wie due:2026-06-30'
+    sampleTask3: 'Füge ein Fälligkeitsdatum hinzu wie due:2026-06-30',
+    externalChangesLoaded: 'Externe Änderungen geladen'
   },
   en: {
     tasksTitle: 'Your Tasks',
@@ -491,7 +492,8 @@ export const translations = {
     onboardingGitHub: 'Windows App (GitHub)',
     sampleTask1: '(A) Welcome to the app! Complete this task by clicking the circle',
     sampleTask2: 'Structure tasks with +projects and @contexts',
-    sampleTask3: 'Add a due date like due:2026-06-30'
+    sampleTask3: 'Add a due date like due:2026-06-30',
+    externalChangesLoaded: 'External changes loaded'
   },
   la: {
     tasksTitle: 'Tua Pensa',

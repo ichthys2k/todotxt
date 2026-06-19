@@ -17,6 +17,8 @@ import { getTheme, setTheme } from '../services/themeService';
 import { getDensity, setDensity, applyDensity, type Density } from '../services/densityService';
 import { HelpModal } from './HelpModal';
 import { playTaskCreatedSound, playTaskCompletedSound } from '../utils/audio';
+import { useGoogleLogin } from '@react-oauth/google';
+import { setGoogleDriveToken } from '../services/providers/GoogleDriveSyncProvider';
 import { t } from '../services/translationService';
 import type { Language } from '../services/translationService';
 
@@ -202,9 +204,27 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
   const isGDriveMode = storageMode === 'gdrive';
   const isElectron = typeof window !== 'undefined' && window.navigator.userAgent.toLowerCase().includes('electron');
   const [tasks, setTasks] = useState<TodoTask[]>([]);
+  const tasksRef = useRef(tasks);
+  useEffect(() => { tasksRef.current = tasks; }, [tasks]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [googleTokenExpired, setGoogleTokenExpired] = useState(false);
+
+  const googleRenewToken = useGoogleLogin({
+    onSuccess: (tokenResponse) => {
+      setGoogleDriveToken(tokenResponse.access_token);
+      setGoogleTokenExpired(false);
+      setError(null);
+      loadTasks();
+    },
+    onError: (error) => {
+      console.error('Google Renewal Failed:', error);
+      setError('Google Sitzungserneuerung fehlgeschlagen.');
+    },
+    scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly',
+    prompt: 'none'
+  });
   const [isLocalFileLinked, setIsLocalFileLinked] = useState(false);
 
   const [migrationData, setMigrationData] = useState<{
@@ -1197,16 +1217,41 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
     return () => window.removeEventListener('focus', handleFocus);
   }, [isOnline, isLocalMode, hasFileSelected, syncing]);
 
-  // Periodischer Sync alle 5 Minuten
+  // Periodische Prüfung auf externe Änderungen
   useEffect(() => {
-    if (isLocalMode || !hasFileSelected) return;
-    const interval = setInterval(() => {
-      if (isOnline && !syncing) {
-        handleSync();
+    if (!hasFileSelected) return;
+    if (!isLocalMode && !isOnline) return;
+
+    const checkExternalChanges = async () => {
+      if (syncing) return;
+      try {
+        const remoteContent = await fetchTodoContent(storageMode);
+        const currentLocalContent = serializeTodos(tasksRef.current);
+        
+        if (remoteContent.trim() !== currentLocalContent.trim() && remoteContent.trim() !== '') {
+          const { mergeTodoContents } = await import('../utils/todoMerger');
+          const mergedContent = mergeTodoContents(currentLocalContent, remoteContent);
+          
+          if (mergedContent.trim() !== currentLocalContent.trim()) {
+            const parsed = parseTodos(mergedContent);
+            setTasks(parsed);
+            
+            if (mergedContent.trim() !== remoteContent.trim()) {
+              await saveTodoContent(storageMode, mergedContent);
+            }
+            
+            showToast(t('externalChangesLoaded', language) || 'Externe Änderungen geladen');
+          }
+        }
+      } catch (e) {
+        console.warn("Fehler bei der periodischen Prüfung:", e);
       }
-    }, 5 * 60 * 1000);
+    };
+
+    const intervalTime = isLocalMode ? 10 * 1000 : 2 * 60 * 1000;
+    const interval = setInterval(checkExternalChanges, intervalTime);
     return () => clearInterval(interval);
-  }, [isOnline, isLocalMode, hasFileSelected, syncing]);
+  }, [isOnline, isLocalMode, hasFileSelected, syncing, storageMode, language]);
 
   // Auto-focus first task when view/filters change
   useEffect(() => {
@@ -1292,7 +1337,6 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
       setLoading(true);
       setError(null);
       checkLocalFile();
-      setTasks([]);
       if (!isConfigLoaded) {
         await loadConfig();
       }
@@ -1311,11 +1355,11 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
             const cachedTasks = cachedData.tasks || [];
             
             let hasChanges = false;
-            const completedIds = new Set(cachedTasks.filter((t: any) => t.isCompleted).map((t: any) => t.id));
+            const completedOriginalTexts = new Set(cachedTasks.filter((t: any) => t.isCompleted).map((t: any) => t.originalText));
             
-            if (completedIds.size > 0) {
+            if (completedOriginalTexts.size > 0) {
               finalTasks = finalTasks.flatMap(t => {
-                if (completedIds.has(t.id) && !t.isCompleted) {
+                if (completedOriginalTexts.has(t.originalText) && !t.isCompleted) {
                   hasChanges = true;
                   return completeTask(t);
                 }
@@ -1323,7 +1367,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
               });
             }
 
-            const newTasksFromCache = cachedTasks.filter((ct: any) => !ct.isCompleted && !finalTasks.some(ft => ft.id === ct.id || ft.originalText === ct.originalText));
+            const newTasksFromCache = cachedTasks.filter((ct: any) => !ct.isCompleted && !finalTasks.some(ft => ft.originalText === ct.originalText));
             if (newTasksFromCache.length > 0) {
               hasChanges = true;
               finalTasks = [...finalTasks, ...newTasksFromCache];
@@ -1389,7 +1433,12 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
       } else if (err.message === 'GIT_NOT_CONFIGURED') {
         setError('GitHub: Keine Verbindungsdaten konfiguriert. Bitte erneut anmelden.');
       } else if (err.message === 'GDRIVE_NOT_AUTHENTICATED' || err.message === 'GDRIVE_TOKEN_EXPIRED') {
-        setError('Google Drive: Nicht angemeldet oder Sitzung abgelaufen. Bitte erneut anmelden.');
+        if (storageMode === 'gdrive' && typeof window !== 'undefined' && !(window as any).Capacitor?.isNativePlatform?.()) {
+          setGoogleTokenExpired(true);
+          setError('Google Drive Sitzung abgelaufen.');
+        } else {
+          setError('Google Drive: Nicht angemeldet oder Sitzung abgelaufen. Bitte erneut anmelden.');
+        }
       } else if (err.message?.includes('403')) {
         setError(`Google Drive: Zugriff verweigert (403). Details: ${err.message}. Bitte melde dich erneut an und stelle sicher, dass du auf dem Google-Consent-Bildschirm das Häkchen für den Drive-Dateizugriff gesetzt hast.`);
       } else if (err.message?.startsWith('CONFLICT:')) {
@@ -2392,6 +2441,15 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
                   className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-sm cursor-pointer transition-colors"
                 >
                   {t('grantPermissionBtn', language)}
+                </button>
+              )}
+              {googleTokenExpired && (
+                <button
+                  onClick={() => googleRenewToken()}
+                  className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors"
+                >
+                  <RefreshCw size={14} />
+                  Sitzung erneuern
                 </button>
               )}
             </div>

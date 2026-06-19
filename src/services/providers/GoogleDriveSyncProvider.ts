@@ -17,7 +17,21 @@ export const setGoogleDriveToken = (token: string) => {
   localStorage.setItem(GDRIVE_TOKEN_KEY, token);
 };
 
-export const getGoogleDriveToken = (): string | null => {
+import { Capacitor } from '@capacitor/core';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+
+export const getGoogleDriveToken = async (): Promise<string | null> => {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const authResult = await GoogleAuth.refresh();
+      if (authResult.accessToken) {
+        setGoogleDriveToken(authResult.accessToken);
+        return authResult.accessToken;
+      }
+    } catch (e) {
+      console.warn("Native GoogleAuth refresh failed:", e);
+    }
+  }
   return localStorage.getItem(GDRIVE_TOKEN_KEY);
 };
 
@@ -115,7 +129,7 @@ export class GoogleDriveSyncProvider implements SyncProvider {
     }
 
     try {
-      const token = getGoogleDriveToken();
+      const token = await getGoogleDriveToken();
       if (!token) throw new Error('GDRIVE_NOT_AUTHENTICATED');
 
       let fileId = this.getFileIdFromStorage(idKey);
@@ -172,7 +186,7 @@ export class GoogleDriveSyncProvider implements SyncProvider {
     }
 
     try {
-      const token = getGoogleDriveToken();
+      const token = await getGoogleDriveToken();
       if (!token) throw new Error('GDRIVE_NOT_AUTHENTICATED');
 
       let fileId = this.getFileIdFromStorage(idKey);
@@ -187,13 +201,34 @@ export class GoogleDriveSyncProvider implements SyncProvider {
         }
       }
 
+      // --- MERGE LOGIC ---
+      let finalContent = content;
+      try {
+        const getRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (getRes.ok) {
+          const remoteContent = await getRes.text();
+          if (filename === 'todo.config.json') {
+            const { mergeConfigContents } = await import('../../utils/todoMerger');
+            finalContent = mergeConfigContents(content, remoteContent);
+          } else {
+            const { mergeTodoContents } = await import('../../utils/todoMerger');
+            finalContent = mergeTodoContents(content, remoteContent);
+          }
+        }
+      } catch (e) {
+        console.warn(`Fehler beim Herunterladen für Merge von ${filename}:`, e);
+      }
+      // --- END MERGE LOGIC ---
+
       const res = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'text/plain'
         },
-        body: content
+        body: finalContent
       });
 
       if (res.status === 401) throw new Error('GDRIVE_TOKEN_EXPIRED');
@@ -211,8 +246,9 @@ export class GoogleDriveSyncProvider implements SyncProvider {
         throw new Error(errorMsg);
       }
 
+      localStorage.setItem(cacheKey, finalContent);
       localStorage.removeItem(pendingKey);
-      return content;
+      return finalContent;
     } catch (e: any) {
       console.warn(`Speichern von ${filename} in Google Drive fehlgeschlagen:`, e);
       localStorage.setItem(pendingKey, 'true');

@@ -33,7 +33,7 @@ export const GoogleDrivePicker = ({ onFileSelected, onCancel, mode = 'todo' }: G
     try {
       setLoading(true);
       setError(null);
-      const token = getGoogleDriveToken();
+      const token = await getGoogleDriveToken();
       if (!token) throw new Error('Nicht angemeldet.');
 
       // Build query: items inside the parent folder and not trashed
@@ -106,7 +106,7 @@ export const GoogleDrivePicker = ({ onFileSelected, onCancel, mode = 'todo' }: G
       setCreating(true);
       setError(null);
       
-      const token = getGoogleDriveToken();
+      const token = await getGoogleDriveToken();
       if (!token) throw new Error('Nicht angemeldet.');
 
       const metadata = {
