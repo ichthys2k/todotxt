@@ -1,3 +1,6 @@
+import { parseTodos, serializeTodos } from '../services/todoParser';
+import type { TodoTask } from '../services/todoParser';
+
 export function getCoreTaskText(line: string): string {
   let text = line.trim();
   if (text.startsWith('x ')) {
@@ -21,67 +24,52 @@ export function getCoreTaskText(line: string): string {
 }
 
 export function mergeTodoContents(local: string, remote: string): string {
-  const localLines = local.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-  const remoteLines = remote.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const localTasks = parseTodos(local);
+  const remoteTasks = parseTodos(remote);
 
-  // Map core task text to lines
-  const localMap = new Map<string, string[]>();
-  for (const line of localLines) {
-    const core = getCoreTaskText(line);
-    if (!localMap.has(core)) {
-      localMap.set(core, []);
+  const localMap = new Map<string, TodoTask>();
+  for (const task of localTasks) {
+    if (task.id) {
+      localMap.set(task.id, task);
     }
-    localMap.get(core)!.push(line);
   }
 
-  const remoteMap = new Map<string, string[]>();
-  for (const line of remoteLines) {
-    const core = getCoreTaskText(line);
-    if (!remoteMap.has(core)) {
-      remoteMap.set(core, []);
+  const remoteMap = new Map<string, TodoTask>();
+  for (const task of remoteTasks) {
+    if (task.id) {
+      remoteMap.set(task.id, task);
     }
-    remoteMap.get(core)!.push(line);
   }
 
-  const mergedLines: string[] = [];
-  const handledLocalCores = new Set<string>();
+  const mergedTasks: TodoTask[] = [];
+  const handledIds = new Set<string>();
 
-  // Process all remote core tasks
-  for (const [core, rLines] of remoteMap.entries()) {
-    const lLines = localMap.get(core) || [];
-    handledLocalCores.add(core);
+  // Process all remote tasks
+  for (const [id, rTask] of remoteMap.entries()) {
+    const lTask = localMap.get(id);
+    handledIds.add(id);
 
-    const maxLen = Math.max(rLines.length, lLines.length);
-    for (let i = 0; i < maxLen; i++) {
-      const rLine = rLines[i];
-      const lLine = lLines[i];
-
-      if (rLine && lLine) {
-        const rIsCompleted = rLine.trim().startsWith('x ');
-        const lIsCompleted = lLine.trim().startsWith('x ');
-        if (lIsCompleted && !rIsCompleted) {
-          mergedLines.push(lLine);
-        } else {
-          mergedLines.push(rLine);
-        }
-      } else if (rLine) {
-        mergedLines.push(rLine);
-      } else if (lLine) {
-        mergedLines.push(lLine);
+    if (lTask) {
+      // Both exist: if one is completed and the other is not, prefer the completed one.
+      // Otherwise remote wins.
+      if (lTask.isCompleted && !rTask.isCompleted) {
+        mergedTasks.push(lTask);
+      } else {
+        mergedTasks.push(rTask);
       }
+    } else {
+      mergedTasks.push(rTask);
     }
   }
 
-  // Add any local core tasks that were not in remote
-  for (const [core, lLines] of localMap.entries()) {
-    if (!handledLocalCores.has(core)) {
-      for (const lLine of lLines) {
-        mergedLines.push(lLine);
-      }
+  // Add any local tasks that were not in remote
+  for (const [id, lTask] of localMap.entries()) {
+    if (!handledIds.has(id)) {
+      mergedTasks.push(lTask);
     }
   }
 
-  return mergedLines.join('\n') + '\n';
+  return serializeTodos(mergedTasks);
 }
 
 export function mergeConfigContents(local: string, remote: string): string {

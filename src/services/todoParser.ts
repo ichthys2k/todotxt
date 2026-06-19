@@ -29,7 +29,7 @@ export const getTodayDate = (): string => {
 export const parseTask = (line: string): TodoTask => {
   let text = line.trim();
   const task: TodoTask = {
-    id: crypto.randomUUID(),
+    id: '', // Wird unten gesetzt
     originalText: line,
     isCompleted: false,
     priority: null,
@@ -41,7 +41,10 @@ export const parseTask = (line: string): TodoTask => {
     tags: {},
   };
 
-  if (!text) return task;
+  if (!text) {
+    task.id = crypto.randomUUID().split('-')[0];
+    return task;
+  }
 
   // 1. Completion Status
   if (text.startsWith('x ')) {
@@ -112,6 +115,16 @@ export const parseTask = (line: string): TodoTask => {
       }
     }
   });
+
+  // Stabile ID verarbeiten
+  if (task.tags['id']) {
+    task.id = task.tags['id'];
+  } else {
+    const newId = crypto.randomUUID().split('-')[0];
+    task.tags['id'] = newId;
+    task.description = task.description.trim() ? `${task.description.trim()} id:${newId}` : `id:${newId}`;
+    task.id = newId;
+  }
 
   return task;
 };
@@ -205,8 +218,21 @@ export const completeTask = (task: TodoTask): TodoTask[] => {
     const isStrict = recRule.startsWith('+'); // Relativ zum alten due date vs. relativ zu heute
     
     // Neuer Task wird erstellt (nicht erledigt)
-    const newTask = { ...task, id: crypto.randomUUID() };
+    const newTask = { ...task };
     
+    // Eigene ID generieren für Folgetask
+    const nextId = crypto.randomUUID().split('-')[0];
+    newTask.id = nextId;
+    newTask.tags = { ...task.tags, id: nextId };
+    
+    if (task.tags['id']) {
+      const oldIdTag = `id:${task.tags['id']}`;
+      const newIdTag = `id:${nextId}`;
+      newTask.description = newTask.description.replace(oldIdTag, newIdTag);
+    } else {
+      newTask.description = newTask.description.trim() ? `${newTask.description.trim()} id:${nextId}` : `id:${nextId}`;
+    }
+
     let baseDateForRec = today;
     if (isStrict && task.tags['due']) {
       baseDateForRec = task.tags['due'];
