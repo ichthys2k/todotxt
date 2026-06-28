@@ -1,0 +1,60 @@
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import './index.css';
+import App from './App.tsx';
+import { MsalProvider } from '@azure/msal-react';
+import { msalInstance } from './config/msal.ts';
+import { registerSW } from 'virtual:pwa-register';
+
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  registerSW({ immediate: true });
+}
+
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
+// Google Cloud Client ID für Todo.txt
+export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+
+// Google Cloud Projektnummer / App-ID (erforderlich für drive.file Scope im Picker)
+export const GOOGLE_APP_ID = import.meta.env.VITE_GOOGLE_APP_ID || '';
+
+// Google Cloud API-Schlüssel (für den Google Picker)
+export const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
+
+import { restoreLocalStorageBackup, initLocalStorageBackup } from './services/localStoragePersistence.ts';
+import { googleAuthService } from './services/googleAuthService.ts';
+
+// Initialize localStorage backup and MSAL before rendering
+const startApp = async () => {
+  await restoreLocalStorageBackup();
+  initLocalStorageBackup();
+  
+  await msalInstance.initialize();
+
+  // Pre-initialize Google SDK only if consent was given or the user is already logged in
+  const consent = localStorage.getItem('todo_txt_cookie_consent');
+  const hasExternalConsent = consent ? JSON.parse(consent).externalServices : false;
+  const hasGoogleToken = !!localStorage.getItem('todo_txt_gdrive_token');
+
+  if (hasExternalConsent || hasGoogleToken) {
+    try {
+      await googleAuthService.initialize();
+    } catch (e) {
+      console.warn('Failed to pre-initialize Google Auth Service:', e);
+    }
+  }
+  
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+        <MsalProvider instance={msalInstance}>
+          <App />
+        </MsalProvider>
+      </GoogleOAuthProvider>
+    </StrictMode>,
+  );
+};
+
+startApp();
+

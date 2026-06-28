@@ -1,0 +1,16 @@
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\obj\Release\TodoTxtPowerToysPlugin.GeneratedMSBuildEditorConfig.editorconfig
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\obj\Release\TodoTxtPowerToysPlugin.AssemblyInfoInputs.cache
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\obj\Release\TodoTxtPowerToysPlugin.AssemblyInfo.cs
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\obj\Release\TodoTxtPowerToysPlugin.csproj.CoreCompileInputs.cache
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\obj\Release\TodoTxtPowerToysPlugin.sourcelink.json
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\obj\Release\TodoTxtPowerToysPlugin.csproj.AssemblyReference.cache
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\bin\Release\TodoTxtPowerToysPlugin.deps.json
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\bin\Release\TodoTxtPowerToysPlugin.dll
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\bin\Release\TodoTxtPowerToysPlugin.pdb
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\obj\Release\TodoTxtPowerToysPlugin.dll
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\obj\Release\refint\TodoTxtPowerToysPlugin.dll
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\obj\Release\TodoTxtPowerToysPlugin.pdb
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\obj\Release\ref\TodoTxtPowerToysPlugin.dll
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\bin\Release\Wox.Plugin.dll
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\bin\Release\Wox.Plugin.pdb
+Z:\OneDrive - Freie Evangelische Schule Reutlingen e.V\Dokumente\10Informatik\Klasse 09\Antigravity\Projekte\todotxtwebapp\powertoys-plugin\obj\Release\TodoTxtP.46BE3DA5.Up2Date

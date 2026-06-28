@@ -1,0 +1,14 @@
+{
+  "tasks": [
+    {
+      "id": "1",
+      "priorityText": "(A) ",
+      "description": "Willkommen bei deinem Todo.txt Widget!"
+    },
+    {
+      "id": "2",
+      "priorityText": "",
+      "description": "Starte die App, um deine echten Aufgaben zu laden."
+    }
+  ]
+}
