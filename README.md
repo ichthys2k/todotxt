@@ -14,7 +14,7 @@ Eine elegante, moderne und serverlose WebApp zur Verwaltung von Aufgaben im stan
   - **Google Drive Sync:** Nutze deinen Google-Speicher.
   - **WebDAV:** Synchronisiere mit Nextcloud, ownCloud oder anderen WebDAV-Servern.
   - **GitHub/Git Sync:** Sichere deine Aufgaben direkt in einem Git-Repository.
-  - **Lokal:** Nutze die App ohne Anmeldung (Daten verbleiben im Browser oder lokalen Dateisystem).
+  - **Lokal:** Nutze die App ohne Anmeldung, indem du eine lokale `todo.txt`-Datei direkt verknüpfst.
 - 📊 **Produktivitäts-Dashboard:** Behalte deinen Fortschritt im Blick.
 - 🌓 **Dark Mode:** Modernes Design mit automatischer Theme-Unterstützung.
 - 📱 **Native Mobile Apps & Desktop:** Optimierte Versionen für Windows und Android.
@@ -52,8 +52,8 @@ Stelle sicher, dass [Node.js](https://nodejs.org/) (Version 18 oder neuer) insta
 
 1. **Repository klonen:**
    ```bash
-   git clone https://github.com/DEIN_BENUTZERNAME/todotxtwebapp.git
-   cd todotxtwebapp
+    git clone https://github.com/ichthys2k/todotxt.git
+    cd todotxt
    ```
 2. **Abhängigkeiten installieren:**
    ```bash
