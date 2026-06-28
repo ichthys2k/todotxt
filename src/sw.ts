@@ -130,7 +130,8 @@ sw.addEventListener('widgetclick', (event: any) => {
           projects: [],
           contexts: [],
           tags: {},
-          creationDate: new Date().toISOString().split('T')[0]
+          creationDate: new Date().toISOString().split('T')[0],
+          isFromWidget: true
         };
         tasks.push(newTask);
         

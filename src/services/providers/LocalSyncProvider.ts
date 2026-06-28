@@ -239,7 +239,42 @@ export class LocalSyncProvider implements SyncProvider {
   }
 
   async saveTodoContent(content: string): Promise<string> {
-    localStorage.setItem(LOCAL_STORAGE_KEY, content);
+    let finalContent = content;
+    const localCache = localStorage.getItem(LOCAL_STORAGE_KEY) || '';
+
+    try {
+      let diskContent = '';
+      if (Capacitor.isNativePlatform()) {
+        const uriStr = localStorage.getItem('todo_txt_saf_folder_uri');
+        if (uriStr) {
+          const res = await SafStorage.readFile({ folderUri: uriStr, fileName: 'todo.txt' });
+          diskContent = res.content || '';
+        }
+      } else if (window.electronAPI) {
+        const paths = await window.electronAPI.getPaths();
+        if (paths?.todo) {
+          diskContent = await window.electronAPI.readFile(paths.todo);
+        }
+      } else {
+        const handle = await getTodoFileHandle();
+        if (handle) {
+          const hasPerm = await verifyFilePermission(handle, false);
+          if (hasPerm) {
+            const file = await handle.getFile();
+            diskContent = await file.text();
+          }
+        }
+      }
+
+      if (diskContent && diskContent !== localCache) {
+        const { mergeTodoContents } = await import('../../utils/todoMerger');
+        finalContent = mergeTodoContents(content, diskContent);
+      }
+    } catch (e) {
+      console.warn('Failed to read disk content for pre-save merge (todo.txt):', e);
+    }
+
+    localStorage.setItem(LOCAL_STORAGE_KEY, finalContent);
 
     if (Capacitor.isNativePlatform()) {
       const uriStr = localStorage.getItem('todo_txt_saf_folder_uri');
@@ -250,21 +285,21 @@ export class LocalSyncProvider implements SyncProvider {
         await SafStorage.writeFile({
           folderUri: uriStr,
           fileName: 'todo.txt',
-          content: content
+          content: finalContent
         });
       } catch (e: any) {
         console.error('SafStorage: Failed to write todo.txt', e);
         throw new Error('FILE_WRITE_FAILED');
       }
-      return content;
+      return finalContent;
     }
 
     if (window.electronAPI) {
       const paths = await window.electronAPI.getPaths();
       if (paths.todo) {
         try {
-          await window.electronAPI.writeFile(paths.todo, content);
-          return content;
+          await window.electronAPI.writeFile(paths.todo, finalContent);
+          return finalContent;
         } catch (e: any) {
           console.error('Electron: Failed to write todo.txt', e);
           throw new Error('FILE_WRITE_FAILED');
@@ -279,7 +314,7 @@ export class LocalSyncProvider implements SyncProvider {
       if (hasPerm) {
         try {
           const writable = await handle.createWritable();
-          await writable.write(content);
+          await writable.write(finalContent);
           await writable.close();
         } catch (e: any) {
           console.error('Failed to write to linked todo.txt handle', e);
@@ -291,7 +326,7 @@ export class LocalSyncProvider implements SyncProvider {
     } else {
       throw new Error('FILE_WRITE_FAILED');
     }
-    return content;
+    return finalContent;
   }
 
   async fetchArchiveContent(): Promise<string> {
@@ -351,7 +386,42 @@ export class LocalSyncProvider implements SyncProvider {
   }
 
   async saveArchiveContent(content: string): Promise<string> {
-    localStorage.setItem(LOCAL_ARCHIVE_KEY, content);
+    let finalContent = content;
+    const localCache = localStorage.getItem(LOCAL_ARCHIVE_KEY) || '';
+
+    try {
+      let diskContent = '';
+      if (Capacitor.isNativePlatform()) {
+        const uriStr = localStorage.getItem('todo_txt_saf_folder_uri');
+        if (uriStr) {
+          const res = await SafStorage.readFile({ folderUri: uriStr, fileName: 'archive.txt' });
+          diskContent = res.content || '';
+        }
+      } else if (window.electronAPI) {
+        const paths = await window.electronAPI.getPaths();
+        if (paths?.archive) {
+          diskContent = await window.electronAPI.readFile(paths.archive);
+        }
+      } else {
+        const handle = await getArchiveFileHandle();
+        if (handle) {
+          const hasPerm = await verifyFilePermission(handle, false);
+          if (hasPerm) {
+            const file = await handle.getFile();
+            diskContent = await file.text();
+          }
+        }
+      }
+
+      if (diskContent && diskContent !== localCache) {
+        const { mergeTodoContents } = await import('../../utils/todoMerger');
+        finalContent = mergeTodoContents(content, diskContent);
+      }
+    } catch (e) {
+      console.warn('Failed to read disk content for pre-save merge (archive.txt):', e);
+    }
+
+    localStorage.setItem(LOCAL_ARCHIVE_KEY, finalContent);
 
     if (Capacitor.isNativePlatform()) {
       const uriStr = localStorage.getItem('todo_txt_saf_folder_uri');
@@ -362,21 +432,21 @@ export class LocalSyncProvider implements SyncProvider {
         await SafStorage.writeFile({
           folderUri: uriStr,
           fileName: 'archive.txt',
-          content: content
+          content: finalContent
         });
       } catch (e: any) {
         console.error('SafStorage: Failed to write archive.txt', e);
         throw new Error('ARCHIVE_FILE_WRITE_FAILED');
       }
-      return content;
+      return finalContent;
     }
 
     if (window.electronAPI) {
       const paths = await window.electronAPI.getPaths();
       if (paths.archive) {
         try {
-          await window.electronAPI.writeFile(paths.archive, content);
-          return content;
+          await window.electronAPI.writeFile(paths.archive, finalContent);
+          return finalContent;
         } catch (e: any) {
           console.error('Electron: Failed to write archive.txt', e);
           throw new Error('ARCHIVE_FILE_WRITE_FAILED');
@@ -391,7 +461,7 @@ export class LocalSyncProvider implements SyncProvider {
       if (hasPerm) {
         try {
           const writable = await handle.createWritable();
-          await writable.write(content);
+          await writable.write(finalContent);
           await writable.close();
         } catch (e: any) {
           console.error('Failed to write to linked archive.txt handle', e);
@@ -403,7 +473,7 @@ export class LocalSyncProvider implements SyncProvider {
     } else {
       throw new Error('ARCHIVE_FILE_WRITE_FAILED');
     }
-    return content;
+    return finalContent;
   }
 
   async fetchConfigContent(): Promise<string> {

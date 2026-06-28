@@ -1429,11 +1429,11 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
             const cachedTasks = cachedData.tasks || [];
             
             let hasChanges = false;
-            const completedIds = new Set(cachedTasks.filter((t: any) => t.isCompleted).map((t: any) => t.id));
+            const completedTexts = new Set(cachedTasks.filter((t: any) => t.isCompleted).map((t: any) => t.originalText));
             
-            if (completedIds.size > 0) {
+            if (completedTexts.size > 0) {
               finalTasks = finalTasks.flatMap(t => {
-                if (completedIds.has(t.id) && !t.isCompleted) {
+                if (completedTexts.has(t.originalText) && !t.isCompleted) {
                   hasChanges = true;
                   return completeTask(t);
                 }
@@ -1441,7 +1441,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
               });
             }
 
-            const newTasksFromCache = cachedTasks.filter((ct: any) => !ct.isCompleted && !finalTasks.some(ft => ft.id === ct.id || ft.originalText === ct.originalText));
+            const newTasksFromCache = cachedTasks.filter((ct: any) => ct.isFromWidget && !ct.isCompleted && !finalTasks.some(ft => ft.originalText === ct.originalText));
             if (newTasksFromCache.length > 0) {
               hasChanges = true;
               finalTasks = [...finalTasks, ...newTasksFromCache];
