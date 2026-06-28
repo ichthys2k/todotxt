@@ -9,12 +9,12 @@ Eine elegante, moderne und serverlose WebApp zur Verwaltung von Aufgaben im stan
 ## Features
 
 - 📑 **Klassisches todo.txt Format:** Volle Kompatibilität mit dem Standard.
-- 🔄 **Serverlose Synchronisation:**
+- 📁 **Lokaler Modus (Standard):** Nutze die App ohne Anmeldung, indem du eine lokale `todo.txt`-Datei direkt verknüpfst.
+- 🔄 **Experimentelle Sync-Features (Optional):**
   - **OneDrive Sync:** Synchronisiere direkt mit deinem Microsoft-Konto.
   - **Google Drive Sync:** Nutze deinen Google-Speicher.
   - **WebDAV:** Synchronisiere mit Nextcloud, ownCloud oder anderen WebDAV-Servern.
   - **GitHub/Git Sync:** Sichere deine Aufgaben direkt in einem Git-Repository.
-  - **Lokal:** Nutze die App ohne Anmeldung, indem du eine lokale `todo.txt`-Datei direkt verknüpfst.
 - 📊 **Produktivitäts-Dashboard:** Behalte deinen Fortschritt im Blick.
 - 🌓 **Dark Mode:** Modernes Design mit automatischer Theme-Unterstützung.
 - 📱 **Native Mobile Apps & Desktop:** Optimierte Versionen für Windows und Android.
