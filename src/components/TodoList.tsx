@@ -431,7 +431,7 @@ export const TodoList = ({
         title: t('groupOverdue', language),
         colorClass: 'bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 border-red-100 dark:border-red-900/30',
         tasks: sortTasks(overdue),
-        hideDue: true
+        hideDue: activeSmartView === 'planned' ? false : true
       });
     }
     if (today.length > 0) {
@@ -447,7 +447,7 @@ export const TodoList = ({
         title: t('groupTomorrow', language),
         colorClass: 'bg-yellow-50 dark:bg-yellow-950/10 text-yellow-800 dark:text-yellow-400 border-yellow-100 dark:border-yellow-900/20',
         tasks: sortTasks(tomorrow),
-        hideDue: true
+        hideDue: activeSmartView === 'planned' ? false : true
       });
     }
     if (soon.length > 0) {
@@ -455,7 +455,7 @@ export const TodoList = ({
         title: t('groupSoon', language),
         colorClass: 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30',
         tasks: sortTasks(soon),
-        hideDue: true
+        hideDue: activeSmartView === 'planned' ? false : true
       });
     }
     if (later.length > 0) {
@@ -463,7 +463,7 @@ export const TodoList = ({
         title: t('groupLater', language),
         colorClass: 'bg-indigo-50 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-400 border-indigo-100 dark:border-indigo-900/30',
         tasks: sortTasks(later),
-        hideDue: true
+        hideDue: activeSmartView === 'planned' ? false : true
       });
     }
     if (noDate.length > 0) {

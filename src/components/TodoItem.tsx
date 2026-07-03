@@ -582,9 +582,23 @@ export const TodoItem = ({
 
           let displayWord = word;
           if (key === 'due') {
-            if (isToday) displayWord = `due:${t('inputDateToday', language)}`;
-            else if (isTomorrow) displayWord = `due:${t('inputDateTomorrow', language)}`;
-            else if (wordDate === yesterdayStr) displayWord = `due:${t('dueYesterday', language)}`;
+            if (isToday) {
+              displayWord = `due:${t('inputDateToday', language)}`;
+            } else if (isTomorrow) {
+              displayWord = `due:${t('inputDateTomorrow', language)}`;
+            } else if (wordDate === yesterdayStr) {
+              displayWord = `due:${t('dueYesterday', language)}`;
+            } else {
+              const dateObj = new Date(wordDate);
+              const todayObj = new Date(todayStr);
+              dateObj.setHours(0, 0, 0, 0);
+              todayObj.setHours(0, 0, 0, 0);
+              const diffDays = Math.round((dateObj.getTime() - todayObj.getTime()) / (1000 * 60 * 60 * 24));
+              if (diffDays > 1 && diffDays <= 7) {
+                const weekdayName = dateObj.toLocaleDateString(language, { weekday: 'long' });
+                displayWord = `due:${weekdayName.charAt(0).toUpperCase() + weekdayName.slice(1)}`;
+              }
+            }
           }
 
           return (
