@@ -185,6 +185,16 @@ const calculateNextDate = (baseDateStr: string, recRule: string): string => {
 };
 
 /**
+ * Tiefe Kopie eines Tasks (inkl. tags, projects, contexts).
+ */
+const cloneTask = (task: TodoTask): TodoTask => ({
+  ...task,
+  projects: [...task.projects],
+  contexts: [...task.contexts],
+  tags: { ...task.tags },
+});
+
+/**
  * Markiert einen Task als erledigt.
  * Behandelt die Wiederholungslogik (rec:), falls vorhanden.
  * @returns Ein Array mit dem aktualisierten (erledigten) Task und ggf. einem neu erstellten Folge-Task.
@@ -195,7 +205,7 @@ export const completeTask = (task: TodoTask): TodoTask[] => {
   const today = getTodayDate();
   
   // Kopie des Tasks für die Erledigung
-  const completedTask = { ...task };
+  const completedTask = cloneTask(task);
   completedTask.isCompleted = true;
   completedTask.completionDate = today;
 
@@ -205,7 +215,9 @@ export const completeTask = (task: TodoTask): TodoTask[] => {
     const isStrict = recRule.startsWith('+'); // Relativ zum alten due date vs. relativ zu heute
     
     // Neuer Task wird erstellt (nicht erledigt)
-    const newTask = { ...task, id: crypto.randomUUID() };
+    // Eigene Kopie von tags/projects/contexts, sonst ändert das Verschieben von due:/t:
+    // auch die erledigte Aufgabe und das Original (gemeinsam genutzte Objekte).
+    const newTask = { ...cloneTask(task), id: crypto.randomUUID() };
     
     let baseDateForRec = today;
     if (isStrict && task.tags['due']) {

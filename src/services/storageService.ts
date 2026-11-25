@@ -60,12 +60,11 @@ export const syncPendingChanges = async (storageMode: StorageMode): Promise<{ to
 export const archiveTasks = async (storageMode: StorageMode, tasksToArchiveStr: string): Promise<void> => {
   if (!tasksToArchiveStr.trim()) return;
 
-  let existingContent = '';
-  try {
-    existingContent = await fetchArchiveContent(storageMode);
-  } catch (e) {
-    console.warn("Konnte Archiv nicht laden:", e);
-  }
+  // Wichtig: Kann das bestehende Archiv nicht gelesen werden, wird abgebrochen.
+  // Früher wurde hier weitergemacht und archive.txt mit NUR den neuen Einträgen
+  // überschrieben – das alte Archiv war dann verloren. Eine noch nicht existierende
+  // Archivdatei liefern alle Provider als leeren Text, nicht als Fehler.
+  const existingContent = await fetchArchiveContent(storageMode);
 
   const newContent = existingContent 
     ? (existingContent.endsWith('\n') ? existingContent + tasksToArchiveStr : existingContent + '\n' + tasksToArchiveStr)

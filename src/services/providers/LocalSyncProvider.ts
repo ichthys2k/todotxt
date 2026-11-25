@@ -268,7 +268,7 @@ export class LocalSyncProvider implements SyncProvider {
 
       if (diskContent && diskContent !== localCache) {
         const { mergeTodoContents } = await import('../../utils/todoMerger');
-        finalContent = mergeTodoContents(content, diskContent);
+        finalContent = mergeTodoContents(content, diskContent, localCache);
       }
     } catch (e) {
       console.warn('Failed to read disk content for pre-save merge (todo.txt):', e);
@@ -415,7 +415,7 @@ export class LocalSyncProvider implements SyncProvider {
 
       if (diskContent && diskContent !== localCache) {
         const { mergeTodoContents } = await import('../../utils/todoMerger');
-        finalContent = mergeTodoContents(content, diskContent);
+        finalContent = mergeTodoContents(content, diskContent, localCache);
       }
     } catch (e) {
       console.warn('Failed to read disk content for pre-save merge (archive.txt):', e);

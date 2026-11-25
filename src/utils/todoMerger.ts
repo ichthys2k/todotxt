@@ -23,7 +23,118 @@ export function getCoreTaskText(line: string): string {
   return text;
 }
 
-export function mergeTodoContents(local: string, remote: string): string {
+const toLines = (content: string): string[] =>
+  content.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+
+const countLines = (lines: string[]): Map<string, number> => {
+  const counts = new Map<string, number>();
+  for (const line of lines) counts.set(line, (counts.get(line) || 0) + 1);
+  return counts;
+};
+
+/**
+ * Wählt bei zwei Fassungen derselben Aufgabe (gleiche id:) die gültige aus:
+ * höheres upd: gewinnt, bei Gleichstand die erledigte, sonst die erste.
+ */
+const pickById = (a: TodoTask, b: TodoTask): TodoTask => {
+  const aUpd = parseInt(a.tags['upd'] || '0', 10);
+  const bUpd = parseInt(b.tags['upd'] || '0', 10);
+  if (bUpd > aUpd) return b;
+  if (aUpd > bUpd) return a;
+  if (b.isCompleted && !a.isCompleted) return b;
+  return a;
+};
+
+/** Entfernt doppelte id:-Einträge; der Gewinner steht an der Stelle des ersten Vorkommens. */
+const dedupeById = (lines: string[]): string[] => {
+  const winners = new Map<string, TodoTask>();
+  for (const line of lines) {
+    const task = parseTask(line);
+    const id = task.tags['id'];
+    if (!id) continue;
+    const existing = winners.get(id);
+    winners.set(id, existing ? pickById(existing, task) : task);
+  }
+  const emitted = new Set<string>();
+  const result: string[] = [];
+  for (const line of lines) {
+    const id = parseTask(line).tags['id'];
+    if (!id) {
+      result.push(line);
+    } else if (!emitted.has(id)) {
+      emitted.add(id);
+      result.push(winners.get(id)!.originalText.trim());
+    }
+  }
+  return result;
+};
+
+/**
+ * Drei-Wege-Merge auf Zeilenebene.
+ *
+ * - base:   letzter gemeinsamer Stand (zuletzt gelesene/geschriebene Datei)
+ * - local:  Stand der App (mit den Änderungen des Nutzers)
+ * - remote: aktueller Stand auf der Platte (extern geändert)
+ *
+ * Eine Bearbeitung zählt als „alte Zeile gelöscht + neue Zeile hinzugefügt“.
+ * Dadurch werden Löschungen beider Seiten respektiert und es entstehen keine
+ * Doppelten. Die Zeilen bleiben unverändert (kein Neu-Serialisieren).
+ */
+const mergeWithBase = (local: string, remote: string, base: string): string => {
+  const localLines = toLines(local);
+  const remoteLines = toLines(remote);
+  const baseCounts = countLines(toLines(base));
+  const remoteCounts = countLines(remoteLines);
+  const localCounts = countLines(localLines);
+
+  // Zeilen, die extern entfernt wurden (wie oft)
+  const removedRemotely = new Map<string, number>();
+  for (const [line, inBase] of baseCounts) {
+    const inRemote = remoteCounts.get(line) || 0;
+    if (inBase > inRemote) removedRemotely.set(line, inBase - inRemote);
+  }
+
+  // 1. Lokaler Stand in lokaler Reihenfolge, ohne extern gelöschte Zeilen
+  const result: string[] = [];
+  for (const line of localLines) {
+    const toRemove = removedRemotely.get(line) || 0;
+    if (toRemove > 0) {
+      removedRemotely.set(line, toRemove - 1);
+      continue;
+    }
+    result.push(line);
+  }
+
+  // 2. Extern neu hinzugekommene Zeilen anhängen (sofern lokal nicht ebenfalls hinzugefügt)
+  const appended = new Map<string, number>();
+  for (const line of remoteLines) {
+    const inBase = baseCounts.get(line) || 0;
+    const addedRemotely = (remoteCounts.get(line) || 0) - inBase;
+    const addedLocally = Math.max(0, (localCounts.get(line) || 0) - inBase);
+    const toAppend = addedRemotely - addedLocally;
+    const done = appended.get(line) || 0;
+    if (done < toAppend) {
+      result.push(line);
+      appended.set(line, done + 1);
+    }
+  }
+
+  return dedupeById(result).join('\n') + '\n';
+};
+
+/**
+ * Führt den Stand der App (local) mit dem aktuellen Dateistand (remote) zusammen.
+ * Mit base (letzter gemeinsamer Stand) wird ein Drei-Wege-Merge gemacht, der auch
+ * Löschungen erkennt. Ohne base wird auf das ältere Vereinigungs-Verfahren zurückgegriffen.
+ */
+export function mergeTodoContents(local: string, remote: string, base?: string): string {
+  if (base && base.trim()) {
+    return mergeWithBase(local, remote, base);
+  }
+  return mergeWithoutBase(local, remote);
+}
+
+function mergeWithoutBase(local: string, remote: string): string {
   const localLines = local.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   const remoteLines = remote.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
 
@@ -154,7 +265,7 @@ export function mergeConfigContents(local: string, remote: string): string {
     }
     
     return JSON.stringify(mergedObj, null, 2);
-  } catch (e) {
+  } catch {
     return local;
   }
 }
