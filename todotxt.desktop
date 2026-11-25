@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Todo.txt
+Comment=Eine elegante, moderne WebApp zur Verwaltung von Aufgaben im todo.txt-Format
+Exec=todotxt %U
+Icon=todotxt
+Terminal=false
+Type=Application
+Categories=Office;Utility;
+MimeType=x-scheme-handler/todotxt;
+StartupWMClass=Todo.txt
