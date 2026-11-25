@@ -77,7 +77,7 @@
     "publish": {
       "provider": "github",
       "owner": "ichthys2k",
-      "repo": "todotxtwebapp"
+      "repo": "todotxt"
     },
     "directories": {
       "output": "dist-desktop"

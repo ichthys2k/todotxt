@@ -6,7 +6,16 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // Build-Ausgaben nicht prüfen (dist-desktop enthält eine komplette App-Kopie samt tsconfig)
+  globalIgnores([
+    'dist',
+    'dist-desktop',
+    'dist-portable-tmp',
+    'build',
+    'app/build',
+    'android',
+    'powertoys-plugin',
+  ]),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
