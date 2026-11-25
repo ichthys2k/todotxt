@@ -19,9 +19,11 @@ android {
     signingConfigs {
         release {
             storeFile file("../../android.keystore")
-            storePassword "todotxtpass2026"
+            // Kennwort: Umgebungsvariable oder ~/.gradle/gradle.properties (TODOTXT_KEYSTORE_PASSWORD), nie hier eintragen
+            def ksPass = System.getenv("TODOTXT_KEYSTORE_PASSWORD") ?: project.findProperty("TODOTXT_KEYSTORE_PASSWORD")
+            storePassword ksPass
             keyAlias "android"
-            keyPassword "todotxtpass2026"
+            keyPassword ksPass
         }
     }
     buildTypes {

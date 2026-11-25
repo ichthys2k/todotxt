@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { spawnSync } from 'child_process';
 import path from 'path';
 import fs from 'fs';
@@ -7,8 +8,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Configuration
 const KEYSTORE_PATH = path.join(__dirname, 'android.keystore');
-const KEYSTORE_PASSWORD = 'todotxtpass2026';
+// Kennwort NICHT hier eintragen: kommt aus .env (TODOTXT_KEYSTORE_PASSWORD), siehe .env.example
+const PASSWORD_ENV = 'TODOTXT_KEYSTORE_PASSWORD';
 const ALIAS = 'android';
+
+if (!process.env[PASSWORD_ENV]) {
+  console.error(`❌  ${PASSWORD_ENV} ist nicht gesetzt. Trage es in die .env ein (siehe .env.example).`);
+  process.exit(1);
+}
 
 // SDK / JDK Paths from Bubblewrap environment
 const JAVA_EXE = 'C:\\Users\\corne\\.bubblewrap\\jdk\\jdk-17.0.11+9\\bin\\java.exe';
@@ -79,10 +86,12 @@ async function main() {
       KEYSTORE_PATH,
       '--ks-key-alias',
       ALIAS,
+      // env: liest das Kennwort aus der Umgebungsvariable – es erscheint so weder
+      // in der Konsolenausgabe von run() noch in der Prozessliste.
       '--ks-pass',
-      `pass:${KEYSTORE_PASSWORD}`,
+      `env:${PASSWORD_ENV}`,
       '--key-pass',
-      `pass:${KEYSTORE_PASSWORD}`,
+      `env:${PASSWORD_ENV}`,
       '--out',
       OUT_SIGNED_APK,
       TEMP_ALIGNED_APK
@@ -107,10 +116,10 @@ async function main() {
     [
       '-keystore',
       KEYSTORE_PATH,
-      '-storepass',
-      KEYSTORE_PASSWORD,
-      '-keypass',
-      KEYSTORE_PASSWORD,
+      '-storepass:env',
+      PASSWORD_ENV,
+      '-keypass:env',
+      PASSWORD_ENV,
       OUT_SIGNED_AAB,
       ALIAS
     ],
