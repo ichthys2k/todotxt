@@ -2,6 +2,7 @@ const { app, BrowserWindow, Menu, ipcMain, dialog, Tray, screen, shell } = requi
 const path = require('path');
 const fs = require('fs');
 const { autoUpdater } = require('electron-updater');
+const security = require('./electron-security.cjs');
 
 // Register custom protocol client
 if (process.defaultApp) {
@@ -87,22 +88,58 @@ function savePaths(paths) {
 // IPC handlers (called from renderer via window.electronAPI)
 // ---------------------------------------------------------------------------
 
-ipcMain.handle('electron:readFile', async (_event, filePath) => {
+// Pfade, die der Nutzer in dieser Sitzung im Auswahldialog gewählt hat. Nur sie (oder die bereits
+// gespeicherten Pfade) dürfen später als todo.txt/archive.txt eingetragen werden.
+const approvedSelections = new Set();
+
+/** Nur die eigenen Hauptframes von Hauptfenster und Widget dürfen die privilegierten Kanäle nutzen. */
+function assertTrustedSender(event) {
+  const wc = event.sender;
+  const isOwnWindow =
+    (mainWindow && !mainWindow.isDestroyed() && wc === mainWindow.webContents) ||
+    (widgetWindow && !widgetWindow.isDestroyed() && wc === widgetWindow.webContents);
+  if (!isOwnWindow || event.senderFrame !== wc.mainFrame) {
+    throw new Error('Zugriff verweigert: unbekannter Absender.');
+  }
+}
+
+/** Datei-Zugriff nur auf die gespeicherten Pfade (todo.txt / archive.txt). */
+function assertAllowedFile(filePath) {
+  const paths = loadPaths();
+  if (!security.isAllowedFile(filePath, [paths.todo, paths.archive])) {
+    throw new Error('Zugriff verweigert: Diese Datei ist nicht als todo.txt/archive.txt verknüpft.');
+  }
+}
+
+ipcMain.handle('electron:readFile', async (event, filePath) => {
+  assertTrustedSender(event);
+  assertAllowedFile(filePath);
+  if (fs.statSync(filePath).size > security.MAX_FILE_BYTES) {
+    throw new Error('Datei ist zu groß.');
+  }
   return fs.readFileSync(filePath, 'utf8');
 });
 
-ipcMain.handle('electron:writeFile', async (_event, filePath, content) => {
+ipcMain.handle('electron:writeFile', async (event, filePath, content) => {
+  assertTrustedSender(event);
+  assertAllowedFile(filePath);
+  if (typeof content !== 'string' || Buffer.byteLength(content, 'utf8') > security.MAX_FILE_BYTES) {
+    throw new Error('Ungültiger oder zu großer Inhalt.');
+  }
   fs.writeFileSync(filePath, content, 'utf8');
 });
 
-ipcMain.handle('electron:selectFile', async (_event, title) => {
+ipcMain.handle('electron:selectFile', async (event, title) => {
+  assertTrustedSender(event);
   const result = await dialog.showOpenDialog(mainWindow, {
-    title: title || 'Datei auswählen',
+    title: typeof title === 'string' ? title.slice(0, 200) : 'Datei auswählen',
     filters: [{ name: 'Text-Dateien', extensions: ['txt'] }],
     properties: ['openFile'],
   });
   if (result.canceled || result.filePaths.length === 0) return null;
-  return result.filePaths[0];
+  const selected = result.filePaths[0];
+  approvedSelections.add(security.comparablePath(selected));
+  return selected;
 });
 
 let todoWatcher = null;
@@ -164,8 +201,20 @@ ipcMain.handle('electron:getPaths', async () => {
   return loadPaths();
 });
 
-ipcMain.handle('electron:setPaths', async (_event, todoPath, archivePath) => {
-  savePaths({ todo: todoPath, archive: archivePath });
+ipcMain.handle('electron:setPaths', async (event, todoPath, archivePath) => {
+  assertTrustedSender(event);
+  const current = loadPaths();
+  // null = Verknüpfung entfernen. Sonst muss der Pfad bereits gespeichert sein oder gerade
+  // über den Auswahldialog gewählt worden sein – die Oberfläche kann ihn nicht frei erfinden.
+  const accept = (candidate, existing) => {
+    if (candidate === null || candidate === undefined) return null;
+    if (typeof candidate !== 'string') throw new Error('Ungültiger Pfad.');
+    if (security.samePath(candidate, existing) || approvedSelections.has(security.comparablePath(candidate))) {
+      return candidate;
+    }
+    throw new Error('Zugriff verweigert: Der Pfad wurde nicht über den Auswahldialog gewählt.');
+  };
+  savePaths({ todo: accept(todoPath, current.todo), archive: accept(archivePath, current.archive) });
   updateWatchers();
 });
 
@@ -204,8 +253,38 @@ ipcMain.handle('electron:checkForUpdates', async () => {
   }
 });
 
-ipcMain.handle('electron:openExternal', async (_event, url) => {
+ipcMain.handle('electron:openExternal', async (event, url) => {
+  assertTrustedSender(event);
+  if (!security.isSafeExternalUrl(url)) {
+    throw new Error('Zugriff verweigert: Nur https-, http- und mailto-Links dürfen geöffnet werden.');
+  }
   await shell.openExternal(url);
+});
+
+// ---------------------------------------------------------------------------
+// Fenster-Härtung: keine fremden Fenster, keine Navigation weg von der App, keine <webview>
+// ---------------------------------------------------------------------------
+
+app.on('web-contents-created', (_event, contents) => {
+  // Links mit target="_blank" und window.open(): nie als neues Electron-Fenster, sondern im Systembrowser
+  contents.setWindowOpenHandler(({ url }) => {
+    if (security.isSafeExternalUrl(url)) {
+      shell.openExternal(url).catch((err) => console.error('openExternal failed:', err));
+    }
+    return { action: 'deny' };
+  });
+
+  // Normale Links ohne target: die App-Seite darf nicht durch eine fremde Seite ersetzt werden
+  contents.on('will-navigate', (event, url) => {
+    if (!security.isAllowedNavigation(url, contents.getURL())) {
+      event.preventDefault();
+      if (security.isSafeExternalUrl(url)) {
+        shell.openExternal(url).catch((err) => console.error('openExternal failed:', err));
+      }
+    }
+  });
+
+  contents.on('will-attach-webview', (event) => event.preventDefault());
 });
 
 // ---------------------------------------------------------------------------
@@ -220,7 +299,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      sandbox: false,                              // must be false for preload require()
+      sandbox: true,                               // Preload nutzt nur 'electron' (contextBridge/ipcRenderer)
       preload: path.join(__dirname, 'preload.cjs'), // contextBridge → window.electronAPI
     },
     title: 'Todo.txt',
@@ -284,7 +363,7 @@ function createWidgetWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      sandbox: false,
+      sandbox: true,
       preload: path.join(__dirname, 'preload.cjs'),
     },
     icon: path.join(__dirname, 'public', 'icon.png'),
