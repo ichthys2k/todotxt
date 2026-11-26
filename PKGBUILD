@@ -1,6 +1,6 @@
 # Maintainer: ichthys2k
 pkgname=todotxtwebapp
-pkgver=1.3.25
+pkgver=1.3.26
 pkgrel=1
 pkgdesc="Eine moderne WebApp zur Verwaltung von Aufgaben im todo.txt-Format"
 arch=('x86_64')

@@ -1,7 +1,7 @@
 {
   "name": "todotxtwebapp",
   "private": true,
-  "version": "1.3.25",
+  "version": "1.3.26",
   "description": "Eine moderne, serverlose WebApp zur Verwaltung von Aufgaben im todo.txt-Format.",
   "homepage": "https://lipponer.de/2do/",
   "author": "ichthys2k <dev@lipponer.de>",
