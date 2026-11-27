@@ -48,3 +48,6 @@ dist-desktop/
 !dist-desktop/TodoTxt-Windows-Portable.exe
 !dist-desktop/TodoTxt-Windows-Portable.zip
 dist-portable-tmp/
+
+# Obsidian plugin build
+dist-obsidian/

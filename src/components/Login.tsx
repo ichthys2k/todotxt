@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { loginWithMicrosoft } from '../services/authService';
 import { googleAuthService } from '../services/googleAuthService';
 import { X } from 'lucide-react';
+import { isElectronEnv } from '../utils/hostEnv';
 
 interface LoginProps {
   onLocalMode: () => void;
@@ -16,7 +17,7 @@ export const Login = ({ onLocalMode, onWebDavMode, onGitMode, onGoogleDriveMode,
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isElectron = typeof window !== 'undefined' && window.navigator.userAgent.toLowerCase().includes('electron');
+  const isElectron = isElectronEnv();
 
   const ensureExternalConsent = () => {
     try {
