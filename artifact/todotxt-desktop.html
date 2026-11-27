@@ -1,0 +1,656 @@
+<title>Todo.txt Desktop</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<script type="application/json" id="claude-artifacts-manifest">{"permissions": ["full-access"]}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: schmale Seitenleiste mit Filtern + Hauptliste; Zeilen wie Textzeilen, Syntax farbig */
+:root {
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --fg: #1c2430;
+  --muted: #627084;
+  --line: #dde3ea;
+  --accent: #1f5fad;
+  --accent-soft: #e3edf9;
+  --pri-a: #c2410c;
+  --pri-b: #b7791f;
+  --pri-c: #2f7d4f;
+  --danger: #b42318;
+  --ctx: #7c3aed;
+  --font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161c; --surface: #1a2029; --fg: #e3e8ef; --muted: #93a0b2; --line: #2a323e;
+    --accent: #7fb0ef; --accent-soft: #1f2d42; --pri-a: #fb8a5c; --pri-b: #e8b856; --pri-c: #6fcf97;
+    --danger: #f97066; --ctx: #b69cff; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161c; --surface: #1a2029; --fg: #e3e8ef; --muted: #93a0b2; --line: #2a323e;
+  --accent: #7fb0ef; --accent-soft: #1f2d42; --pri-a: #fb8a5c; --pri-b: #e8b856; --pri-c: #6fcf97;
+  --danger: #f97066; --ctx: #b69cff; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-ui); font-size: 14px; line-height: 1.45; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.wrap { max-width: 1080px; margin: 0 auto; padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 16px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.brand h1 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+.brand .path { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.status { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.dot.ok { background: var(--pri-c); }
+.dot.busy { background: var(--pri-b); }
+.dot.err { background: var(--danger); }
+
+.banner { background: var(--accent-soft); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.banner p { margin: 0; flex: 1 1 280px; min-width: 0; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 5px 12px; font-size: 13px; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); font-weight: 500; }
+.btn:hover { border-color: var(--accent); }
+
+.add { display: flex; gap: 8px; }
+.add input { flex: 1; min-width: 0; font-family: var(--font-mono); font-size: 14px; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.add input::placeholder { color: var(--muted); }
+
+.layout { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 20px; align-items: start; }
+aside { display: grid; gap: 18px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+aside h2 { margin: 0 0 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.facet { display: grid; gap: 1px; }
+.facet button { display: flex; justify-content: space-between; gap: 8px; text-align: left; border: 0; background: none;
+  padding: 4px 8px; border-radius: 5px; font-family: var(--font-mono); font-size: 13px; }
+.facet button:hover { background: var(--accent-soft); }
+.facet button[aria-pressed="true"] { background: var(--accent); color: var(--surface); }
+.facet .n { font-variant-numeric: tabular-nums; opacity: 0.7; }
+.facet .empty { color: var(--muted); font-size: 12px; padding: 0 8px; }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 8px; }
+.tabs { display: flex; gap: 2px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 2px; }
+.tabs button { border: 0; background: none; padding: 4px 12px; border-radius: 6px; font-size: 13px; }
+.tabs button[aria-selected="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.tabs .n { font-variant-numeric: tabular-nums; color: var(--muted); margin-left: 4px; font-weight: 400; }
+.search { flex: 1 1 160px; min-width: 0; padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+.activefilter { font-size: 12px; color: var(--muted); }
+.activefilter button { border: 0; background: none; color: var(--accent); padding: 0 2px; }
+
+ul.tasks { list-style: none; margin: 0; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.task { display: grid; grid-template-columns: 22px 26px minmax(0, 1fr) auto; gap: 8px; align-items: start;
+  padding: 8px 12px; border-top: 1px solid var(--line); }
+.task:first-child { border-top: 0; }
+.task.done .text { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+.task.later { opacity: 0.55; }
+.task input[type="checkbox"] { width: 16px; height: 16px; margin: 3px 0 0; accent-color: var(--accent); }
+.pri { width: 24px; height: 20px; border-radius: 4px; border: 1px dashed var(--line); background: none; font-family: var(--font-mono);
+  font-size: 12px; font-weight: 500; padding: 0; color: var(--muted); }
+.pri.A { border: 0; background: var(--pri-a); color: var(--surface); }
+.pri.B { border: 0; background: var(--pri-b); color: var(--surface); }
+.pri.C { border: 0; background: var(--pri-c); color: var(--surface); }
+.pri.X { border: 0; background: var(--line); color: var(--fg); }
+.text { min-width: 0; overflow-wrap: anywhere; }
+.tok-proj { color: var(--accent); font-family: var(--font-mono); font-size: 13px; }
+.tok-ctx { color: var(--ctx); font-family: var(--font-mono); font-size: 13px; }
+.tok-tag { color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
+.tok-link { color: var(--accent); }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 2px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.due { font-weight: 500; }
+.due.over { color: var(--danger); }
+.due.today { color: var(--pri-b); }
+.actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.12s; }
+.task:hover .actions, .task:focus-within .actions { opacity: 1; }
+.actions button { border: 0; background: none; font-size: 12px; color: var(--muted); padding: 2px 6px; border-radius: 4px; }
+.actions button:hover { background: var(--accent-soft); color: var(--fg); }
+.actions button.confirm { background: var(--danger); color: var(--surface); }
+.edit { width: 100%; font-family: var(--font-mono); font-size: 13px; padding: 4px 6px; border: 1px solid var(--accent); border-radius: 5px; background: var(--bg); }
+.emptylist { padding: 28px 16px; text-align: center; color: var(--muted); }
+footer { font-size: 12px; color: var(--muted); }
+footer kbd { font-family: var(--font-mono); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; background: var(--surface); }
+
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+  background: var(--fg); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-size: 13px; max-width: calc(100% - 32px); }
+
+@media (max-width: 720px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  aside { position: static; grid-template-columns: 1fr 1fr; }
+  .actions { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Todo.txt</h1>
+      <span class="path" id="pathLabel">~/sync/todotxt/todo.txt</span>
+    </div>
+    <div class="status" role="status" aria-live="polite"><span class="dot" id="dot"></span><span id="statusText">Verbinde …</span></div>
+  </header>
+
+  <div class="banner" id="banner">
+    <p id="bannerText">Du siehst Beispieldaten. Deine echte todo.txt öffnet sich nur in der installierten Desktop-App.</p>
+    <span id="bannerActions"></span>
+  </div>
+
+  <form class="add" id="addForm" autocomplete="off">
+    <input id="addInput" aria-label="Neue Aufgabe in todo.txt-Syntax" placeholder="(A) Neue Aufgabe +Projekt @kontext due:2026-12-01   ⏎">
+    <button class="btn primary" type="submit">Hinzufügen</button>
+  </form>
+
+  <div class="layout">
+    <aside>
+      <section><h2>Projekte</h2><div class="facet" id="projects"></div></section>
+      <section><h2>Kontexte</h2><div class="facet" id="contexts"></div></section>
+    </aside>
+    <main>
+      <div class="toolbar">
+        <div class="tabs" role="tablist" id="tabs">
+          <button role="tab" data-view="today" id="tab-today">Heute<span class="n"></span></button>
+          <button role="tab" data-view="open" id="tab-open">Offen<span class="n"></span></button>
+          <button role="tab" data-view="done" id="tab-done">Erledigt<span class="n"></span></button>
+        </div>
+        <input class="search" id="search" type="search" placeholder="Suchen  /" aria-label="Aufgaben durchsuchen">
+        <span class="activefilter" id="activeFilter"></span>
+      </div>
+      <ul class="tasks" id="list"></ul>
+    </main>
+  </div>
+
+  <footer id="footer">
+    <kbd>n</kbd> neue Aufgabe · <kbd>/</kbd> suchen · Doppelklick bearbeitet die Zeile · Klick auf die Priorität wechselt A → B → C → keine
+  </footer>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script type="module">
+// ---------- Grundzustand ----------
+const DEFAULT_PATH = "~/sync/todotxt/todo.txt";
+const SAMPLE = [
+  "(A) 2026-11-25 Elternabend 6c vorbereiten +Klassenleitung @pc due:" + iso(addDays(new Date(), 0)),
+  "(B) 2026-11-20 Arbeitsblatt Bruchrechnung überarbeiten +Mathe6 @schule due:" + iso(addDays(new Date(), 2)),
+  "2026-11-22 Andacht Wochenstart entwerfen +Andachten @pc due:" + iso(addDays(new Date(), -1)),
+  "(C) Kochbuch: Rezeptseite für Linsensuppe ergänzen +Kochbuch @pc",
+  "Weekly Review rec:1w due:" + iso(addDays(new Date(), 4)) + " @zuhause",
+  "Winterreifen-Termin anrufen @telefon t:" + iso(addDays(new Date(), 7)),
+  "x " + iso(new Date()) + " 2026-11-18 Stroodle-Release prüfen +Stroodle @pc",
+];
+
+const state = {
+  mode: "sample",          // "sample" | "file"
+  path: loadPref("path", DEFAULT_PATH),
+  lines: [...SAMPLE],
+  eol: "\n",
+  trailingNewline: true,
+  lastMtime: null,
+  view: loadPref("view", "today"),
+  project: null,
+  context: null,
+  query: "",
+  editingRaw: null,
+  backedUp: false,
+};
+let desktop = null;
+let fs = null;
+let mcp = null;
+let backend = null;       // { label, read(), stat(), write(text, expectedMtime) }
+let writeChain = Promise.resolve();
+const MCP_SERVER = "host:todotxt";
+
+// ---------- Speicherwege ----------
+class Conflict extends Error {}
+const desktopBackend = {
+  get label() { return state.path; },
+  async read() {
+    const text = await fs.readFile(state.path, "utf8");
+    return { text, mtimeMs: (await fs.stat(state.path)).mtimeMs };
+  },
+  async stat() { return (await fs.stat(state.path)).mtimeMs; },
+  async write(text, expected) {
+    const now = (await fs.stat(state.path)).mtimeMs;
+    if (expected != null && Math.abs(now - expected) > 1) throw new Conflict();
+    if (!state.backedUp) { await fs.copyFile(state.path, state.path + ".artefakt.bak"); state.backedUp = true; }
+    await fs.writeFile(state.path, text, "utf8");
+    return (await fs.stat(state.path)).mtimeMs;
+  },
+};
+function mcpCode(e) { return e?.result?.structuredContent?.code || e?.code || "error"; }
+const mcpBackend = {
+  label: "~/sync/todotxt/todo.txt (über MCP)",
+  async call(tool, input) {
+    const r = await mcp.callTool(MCP_SERVER, tool, input, { cache: false });
+    return r.payload;
+  },
+  async read() {
+    const p = await this.call("read_todo", { file: "todo.txt" });
+    if (p?.path) this.label = p.path.replace(/^\/home\/[^/]+/, "~");
+    return { text: p.content, mtimeMs: p.mtimeMs };
+  },
+  async stat() { return (await this.call("stat_todo", { file: "todo.txt" })).mtimeMs; },
+  async write(text, expected) {
+    try { return (await this.call("write_todo", { file: "todo.txt", content: text, expectedMtimeMs: expected })).mtimeMs; }
+    catch (e) { if (mcpCode(e) === "conflict") throw new Conflict(); throw e; }
+  },
+};
+
+// ---------- Hilfen ----------
+function loadPref(k, d) { try { return localStorage.getItem("todotxt-" + k) ?? d; } catch { return d; } }
+function savePref(k, v) { try { localStorage.setItem("todotxt-" + k, v); } catch { /* egal */ } }
+function iso(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+function parseIso(s) { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ""); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; }
+const today = () => iso(new Date());
+const $ = (id) => document.getElementById(id);
+function el(tag, props = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === "class") e.className = v; else if (k === "text") e.textContent = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v);
+  }
+  for (const k of kids) if (k != null) e.append(k);
+  return e;
+}
+let toastTimer;
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 3200); }
+function setStatus(kind, text) { $("dot").className = "dot " + kind; $("statusText").textContent = text; }
+const clock = () => new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+
+// ---------- todo.txt-Parser (wie src/services/todoParser.ts) ----------
+function parse(raw, idx) {
+  const o = { raw, idx, done: false, pri: null, cdate: null, ddate: null, desc: "", projects: [], contexts: [], tags: {} };
+  let t = raw.trim();
+  if (t.startsWith("x ")) { o.done = true; t = t.slice(2).trim(); }
+  let m = t.match(/^\(([A-Z])\)\s+/);
+  if (m) { o.pri = m[1]; t = t.slice(m[0].length); }
+  const dr = /^(\d{4}-\d{2}-\d{2})\s+/;
+  m = t.match(dr);
+  if (m) {
+    t = t.slice(m[0].length);
+    if (o.done) { o.ddate = m[1]; const m2 = t.match(dr); if (m2) { o.cdate = m2[1]; t = t.slice(m2[0].length); } }
+    else o.cdate = m[1];
+  }
+  o.desc = t;
+  for (const w of t.split(/\s+/)) {
+    if (/^\+\S/.test(w)) o.projects.push(w.slice(1));
+    else if (/^@\S/.test(w)) o.contexts.push(w.slice(1));
+    else { const kv = w.match(/^([A-Za-z][\w-]*):(\S+)$/); if (kv && !/^https?$/i.test(kv[1])) o.tags[kv[1]] = kv[2]; }
+  }
+  return o;
+}
+function serialize(o) {
+  const p = [];
+  if (o.done) { p.push("x"); if (o.ddate) p.push(o.ddate); }
+  if (o.pri && !o.done) p.push("(" + o.pri + ")");
+  if (o.cdate) p.push(o.cdate);
+  p.push(o.desc);
+  return p.join(" ");
+}
+function nextDate(base, rule) {
+  const d = parseIso(base) || new Date();
+  const m = /^\+?(\d+)([dwmy])$/.exec(rule); if (!m) return base;
+  const n = +m[1];
+  if (m[2] === "d") d.setDate(d.getDate() + n);
+  if (m[2] === "w") d.setDate(d.getDate() + 7 * n);
+  if (m[2] === "m") d.setMonth(d.getMonth() + n);
+  if (m[2] === "y") d.setFullYear(d.getFullYear() + n);
+  return iso(d);
+}
+/** Erledigt eine Aufgabe; bei rec: kommt eine Folgeaufgabe dazu. Gibt die neuen Zeilen zurück. */
+function completeLines(o) {
+  const done = { ...o, done: true, ddate: today() };
+  const out = [serialize(done)];
+  const rec = o.tags.rec;
+  if (rec) {
+    const strict = rec.startsWith("+");
+    let desc = o.desc;
+    if (o.tags.due) {
+      const nd = nextDate(strict ? o.tags.due : today(), rec);
+      desc = desc.replace("due:" + o.tags.due, "due:" + nd);
+      if (o.tags.t) desc = desc.replace("t:" + o.tags.t, "t:" + nextDate(strict ? o.tags.t : today(), rec));
+    }
+    out.push(serialize({ ...o, done: false, ddate: null, cdate: o.cdate ? today() : null, desc }));
+  }
+  return out;
+}
+
+// ---------- Datei lesen und schreiben ----------
+function splitText(text) {
+  const eol = text.includes("\r\n") ? "\r\n" : "\n";
+  const trailing = text.endsWith("\n");
+  const lines = text.split(/\r?\n/);
+  if (trailing) lines.pop();
+  return { lines, eol, trailing };
+}
+async function readFile() {
+  const { text, mtimeMs } = await backend.read();
+  const s = splitText(text);
+  state.eol = s.eol; state.trailingNewline = s.trailing || text === "";
+  state.lastMtime = mtimeMs;
+  return s.lines;
+}
+async function writeFile(lines) {
+  const text = lines.join(state.eol) + (state.trailingNewline && lines.length ? state.eol : "");
+  state.lastMtime = await backend.write(text, state.lastMtime);
+}
+
+async function openFile() {
+  setStatus("busy", "Öffne Datei …");
+  try {
+    state.lines = await readFile();
+    state.mode = "file";
+    setStatus("ok", "Geladen · " + clock());
+    showBanner(null);
+    render();
+  } catch (e) {
+    if (backend === mcpBackend) return mcpFailed(e);
+    const msg = String(e && e.message || e);
+    if (msg.startsWith("ENOENT")) {
+      setStatus("err", "Datei nicht gefunden");
+      showBanner("Unter " + state.path + " liegt keine Datei. Prüfe den Pfad.", [["Pfad ändern", changePath]]);
+    } else if (msg.startsWith("EPERM")) {
+      setStatus("err", "Kein Dateizugriff");
+      showBanner("Ohne Dateizugriff kann die App deine todo.txt nicht lesen. Du kannst den Zugriff in den Berechtigungen erlauben.",
+        [["Berechtigungen öffnen", () => desktop.permissions.manage().then(openFile).catch(() => toast("Die Berechtigungen ließen sich nicht öffnen."))]]);
+    } else {
+      setStatus("err", "Fehler beim Lesen");
+      showBanner("Die Datei ließ sich nicht lesen: " + msg, [["Erneut versuchen", openFile]]);
+    }
+  }
+}
+
+function mcpFailed(e) {
+  const code = mcpCode(e);
+  state.mode = "sample";
+  if (code === "server_not_connected" || code === "capability_disabled" || code === "not_granted") {
+    setStatus("err", "todo.txt-Server nicht erreichbar");
+    showBanner("Der lokale todo.txt-Server antwortet nicht. Öffne die Seite in der Claude-Desktop-App auf dem Rechner, auf dem der Server eingerichtet ist.", [["Erneut versuchen", openFile]]);
+  } else if (code === "not_in_manifest" || code === "approval_required" || code === "cancelled") {
+    setStatus("err", "Zugriff nicht erlaubt");
+    showBanner("Der Zugriff auf den todo.txt-Server wurde nicht erlaubt. Du siehst weiter Beispieldaten.", [["Nochmal fragen", openFile]]);
+  } else if (code === "not_found") {
+    setStatus("err", "Datei nicht gefunden");
+    showBanner("Der Server findet keine todo.txt in ~/sync/todotxt.", [["Erneut versuchen", openFile]]);
+  } else {
+    setStatus("err", "Fehler beim Lesen");
+    showBanner("Die todo.txt ließ sich nicht lesen (" + code + ").", [["Erneut versuchen", openFile]]);
+  }
+  render();
+}
+
+/** Führt eine Änderung aus. In der Datei-Variante wird vorher frisch gelesen, damit nichts überschrieben wird. */
+function apply(op) {
+  writeChain = writeChain.then(async () => {
+    try {
+      if (state.mode === "file") { setStatus("busy", "Speichere …"); state.lines = await readFile(); }
+      const lines = [...state.lines];
+      if (op(lines) === false) {
+        toast("Diese Zeile hat sich inzwischen in der Datei geändert. Die Liste ist neu geladen.");
+        setStatus("ok", "Neu geladen · " + clock());
+        render(); return;
+      }
+      state.lines = lines;
+      if (state.mode === "file") { await writeFile(lines); setStatus("ok", "Gespeichert · " + clock()); }
+      render();
+    } catch (e) {
+      if (e instanceof Conflict) {
+        state.lines = await readFile().catch(() => state.lines);
+        toast("Die Datei wurde gerade von außen geändert. Ich habe neu geladen, bitte wiederhole die Änderung.");
+        setStatus("ok", "Neu geladen · " + clock()); render(); return;
+      }
+      if (mcpCode(e) === "cancelled") { toast("Speichern abgebrochen. Die Datei ist unverändert."); setStatus("ok", "Unverändert"); render(); return; }
+      setStatus("err", "Speichern fehlgeschlagen");
+      toast("Speichern fehlgeschlagen: " + (e && e.message || e));
+    }
+  });
+  return writeChain;
+}
+const find = (lines, t) => (lines[t.idx] === t.raw ? t.idx : lines.indexOf(t.raw));
+function onLine(t, fn) { apply((lines) => { const i = find(lines, t); if (i < 0) return false; fn(lines, i); }); }
+
+const actions = {
+  toggle: (t) => onLine(t, (lines, i) => {
+    if (t.done) lines.splice(i, 1, serialize({ ...t, done: false, ddate: null }));
+    else lines.splice(i, 1, ...completeLines(t));
+  }),
+  cyclePri: (t) => onLine(t, (lines, i) => {
+    const order = [null, "A", "B", "C"];
+    const next = order[(order.indexOf(t.pri) + 1) % order.length];
+    lines[i] = serialize({ ...t, pri: next });
+  }),
+  edit: (t, text) => onLine(t, (lines, i) => { lines[i] = text.trim(); }),
+  remove: (t) => onLine(t, (lines, i) => { lines.splice(i, 1); }),
+  add: (text) => apply((lines) => {
+    let line = text.trim();
+    const m = line.match(/^(\([A-Z]\)\s+)?(.*)$/);
+    if (!/^\d{4}-\d{2}-\d{2}\s/.test(m[2]) && !line.startsWith("x ")) line = (m[1] || "") + today() + " " + m[2];
+    lines.push(line);
+  }),
+};
+
+// ---------- Ansicht ----------
+function dueInfo(due) {
+  const d = parseIso(due); if (!d) return null;
+  const diff = Math.round((d - parseIso(today())) / 86400000);
+  if (diff < 0) return { cls: "over", label: diff === -1 ? "gestern fällig" : "seit " + -diff + " Tagen überfällig" };
+  if (diff === 0) return { cls: "today", label: "heute fällig" };
+  if (diff === 1) return { cls: "", label: "morgen" };
+  const wd = d.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" });
+  return { cls: "", label: diff < 7 ? wd : "fällig " + wd };
+}
+const isLater = (t) => t.tags.t && t.tags.t > today();
+const isToday = (t) => !t.done && !isLater(t) && ((t.tags.due && t.tags.due <= today()) || t.pri === "A");
+
+function tasks() { return state.lines.map((raw, i) => ({ raw, i })).filter((x) => x.raw.trim()).map((x) => parse(x.raw, x.i)); }
+
+function sortTasks(list) {
+  return list.sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    if (a.done) return (b.ddate || "").localeCompare(a.ddate || "");
+    const pa = a.pri || "~", pb = b.pri || "~";
+    if (pa !== pb) return pa < pb ? -1 : 1;
+    const da = a.tags.due || "9999", db = b.tags.due || "9999";
+    if (da !== db) return da < db ? -1 : 1;
+    return a.idx - b.idx;
+  });
+}
+
+function renderText(t) {
+  const frag = document.createDocumentFragment();
+  t.desc.split(/(\s+)/).forEach((w) => {
+    if (/^\s+$/.test(w)) { frag.append(w); return; }
+    if (/^\+\S/.test(w)) frag.append(el("span", { class: "tok-proj", text: w }));
+    else if (/^@\S/.test(w)) frag.append(el("span", { class: "tok-ctx", text: w }));
+    else if (/^https:\/\/\S+$/.test(w)) frag.append(el("a", { class: "tok-link", href: w, target: "_blank", rel: "noopener", text: w }));
+    else if (/^[A-Za-z][\w-]*:\S+$/.test(w) && !/^https?:/i.test(w)) frag.append(el("span", { class: "tok-tag", text: w }));
+    else frag.append(w);
+  });
+  return frag;
+}
+
+function taskRow(t) {
+  const li = el("li", { class: "task" + (t.done ? " done" : "") + (isLater(t) ? " later" : "") });
+  if (state.editingRaw === t.raw) {
+    const input = el("input", { class: "edit", "aria-label": "Zeile bearbeiten", id: "edit-" + t.idx });
+    input.value = t.raw;
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && input.value.trim()) { state.editingRaw = null; actions.edit(t, input.value); }
+      if (e.key === "Escape") { state.editingRaw = null; render(); }
+    });
+    input.addEventListener("blur", () => { if (state.editingRaw === t.raw) { state.editingRaw = null; render(); } });
+    li.append(el("span"), el("span"), input, el("span"));
+    queueMicrotask(() => { input.focus(); input.setSelectionRange(input.value.length, input.value.length); });
+    return li;
+  }
+  const cb = el("input", { type: "checkbox", "aria-label": t.done ? "Als offen markieren" : "Als erledigt markieren", onchange: () => actions.toggle(t) });
+  cb.checked = t.done;
+  const pri = el("button", { class: "pri " + (t.pri || ""), title: "Priorität wechseln", "aria-label": "Priorität " + (t.pri || "keine"), text: t.pri || "–" });
+  if (t.done) pri.disabled = true; else pri.addEventListener("click", () => actions.cyclePri(t));
+  const text = el("div", { class: "text", ondblclick: () => { state.editingRaw = t.raw; render(); } }, renderText(t));
+  const meta = el("div", { class: "meta" });
+  if (!t.done && t.tags.due) { const d = dueInfo(t.tags.due); if (d) meta.append(el("span", { class: "due " + d.cls, text: d.label })); }
+  if (t.tags.rec) meta.append(el("span", { text: "↻ " + t.tags.rec }));
+  if (isLater(t)) meta.append(el("span", { text: "ab " + parseIso(t.tags.t).toLocaleDateString("de-DE") }));
+  if (t.done && t.ddate) meta.append(el("span", { text: "erledigt " + parseIso(t.ddate)?.toLocaleDateString("de-DE") }));
+  if (meta.childNodes.length) text.append(meta);
+
+  const del = el("button", { text: "Löschen" });
+  let armed = null;
+  del.addEventListener("click", () => {
+    if (armed) { clearTimeout(armed); actions.remove(t); return; }
+    del.textContent = "Wirklich löschen?"; del.classList.add("confirm");
+    armed = setTimeout(() => { armed = null; del.textContent = "Löschen"; del.classList.remove("confirm"); }, 3000);
+  });
+  const acts = el("div", { class: "actions" }, el("button", { text: "Bearbeiten", onclick: () => { state.editingRaw = t.raw; render(); } }), del);
+  li.append(cb, pri, text, acts);
+  return li;
+}
+
+function facet(container, counts, key, prefix) {
+  container.replaceChildren();
+  const names = Object.keys(counts).sort((a, b) => a.localeCompare(b, "de"));
+  if (!names.length) { container.append(el("span", { class: "empty", text: "keine" })); return; }
+  for (const n of names) {
+    const b = el("button", { "aria-pressed": String(state[key] === n), onclick: () => { state[key] = state[key] === n ? null : n; render(); } },
+      el("span", { text: prefix + n }), el("span", { class: "n", text: String(counts[n]) }));
+    container.append(b);
+  }
+}
+
+function render() {
+  const all = tasks();
+  const open = all.filter((t) => !t.done);
+  const pc = {}, cc = {};
+  open.forEach((t) => { t.projects.forEach((p) => (pc[p] = (pc[p] || 0) + 1)); t.contexts.forEach((c) => (cc[c] = (cc[c] || 0) + 1)); });
+  facet($("projects"), pc, "project", "+");
+  facet($("contexts"), cc, "context", "@");
+
+  const byFacet = (t) => (!state.project || t.projects.includes(state.project)) && (!state.context || t.contexts.includes(state.context))
+    && (!state.query || t.raw.toLowerCase().includes(state.query.toLowerCase()));
+  const views = { today: all.filter(isToday), open, done: all.filter((t) => t.done) };
+  for (const [v, list] of Object.entries(views)) {
+    const tab = $("tab-" + v);
+    tab.setAttribute("aria-selected", String(state.view === v));
+    tab.querySelector(".n").textContent = list.filter(byFacet).length;
+  }
+  const shown = sortTasks(views[state.view].filter(byFacet));
+  const list = $("list");
+  list.replaceChildren(...shown.map(taskRow));
+  if (!shown.length) {
+    const msg = { today: "Heute ist nichts fällig. Aufgaben mit (A) oder fälligem due: erscheinen hier.", open: "Keine offenen Aufgaben für diesen Filter.", done: "Noch nichts erledigt." }[state.view];
+    list.append(el("li", { class: "emptylist", text: msg }));
+  }
+  const af = $("activeFilter"); af.replaceChildren();
+  if (state.project || state.context) {
+    af.append("Filter: " + [state.project && "+" + state.project, state.context && "@" + state.context].filter(Boolean).join(" "),
+      el("button", { text: "aufheben", onclick: () => { state.project = state.context = null; render(); } }));
+  }
+  $("pathLabel").textContent = state.mode === "file" ? backend.label : "Beispieldaten";
+}
+
+function showBanner(text, buttons = []) {
+  const b = $("banner");
+  if (!text) { b.hidden = true; return; }
+  b.hidden = false;
+  $("bannerText").textContent = text;
+  $("bannerActions").replaceChildren(...buttons.map(([label, fn], i) => el("button", { class: "btn" + (i === 0 ? " primary" : ""), type: "button", text: label, onclick: fn })));
+}
+
+function changePath() {
+  const p = $("bannerActions");
+  const input = el("input", { class: "search", id: "pathInput", "aria-label": "Pfad zur todo.txt" });
+  input.value = state.path;
+  const ok = el("button", { class: "btn primary", type: "button", text: "Öffnen", onclick: () => {
+    state.path = input.value.trim() || DEFAULT_PATH; savePref("path", state.path); state.backedUp = false; openFile();
+  } });
+  p.replaceChildren(input, ok); input.focus();
+}
+
+// ---------- Bedienung ----------
+$("addForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const v = $("addInput").value; if (!v.trim()) return;
+  $("addInput").value = ""; actions.add(v);
+});
+$("tabs").addEventListener("click", (e) => { const b = e.target.closest("[data-view]"); if (b) { state.view = b.dataset.view; savePref("view", state.view); render(); } });
+$("search").addEventListener("input", (e) => { state.query = e.target.value; render(); });
+document.addEventListener("keydown", (e) => {
+  if (e.target.matches("input, textarea")) { if (e.key === "Escape") e.target.blur(); return; }
+  if (e.key === "n") { e.preventDefault(); $("addInput").focus(); }
+  if (e.key === "/") { e.preventDefault(); $("search").focus(); }
+});
+
+// Externe Änderungen (Claude, Syncthing, andere Apps) alle 2,5 s erkennen
+setInterval(async () => {
+  if (state.mode !== "file" || document.visibilityState !== "visible" || state.editingRaw) return;
+  writeChain = writeChain.then(async () => {
+    try {
+      const mtime = await backend.stat();
+      if (mtime !== state.lastMtime) { state.lines = await readFile(); setStatus("ok", "Neu geladen · " + clock()); render(); }
+    } catch { /* nächster Versuch */ }
+  });
+}, 2500);
+
+// ---------- App-Icon ----------
+function drawIcon() {
+  const c = document.createElement("canvas"); c.width = c.height = 256;
+  const g = c.getContext("2d");
+  g.fillStyle = "#1f5fad"; g.beginPath(); g.roundRect(16, 16, 224, 224, 48); g.fill();
+  g.strokeStyle = "#ffffff"; g.lineWidth = 22; g.lineCap = "round"; g.lineJoin = "round";
+  g.beginPath(); g.moveTo(70, 118); g.lineTo(108, 156); g.lineTo(186, 78); g.stroke();
+  g.fillStyle = "#ffffff"; g.font = "600 40px 'IBM Plex Mono', monospace"; g.textAlign = "center"; g.fillText("todo.txt", 128, 214);
+  return c.toDataURL("image/png");
+}
+
+// ---------- Start ----------
+render();
+setStatus("", "Beispieldaten");
+(async () => {
+  try { desktop = (await window.claude?.use?.("desktop")) ?? null; } catch { desktop = null; }
+  if (desktop?.fs) {
+    fs = desktop.fs; backend = desktopBackend;
+    desktop.app.dock.setIcon(drawIcon()).catch(() => {});
+    let st = "prompt";
+    try { st = await desktop.permissions.state("full-access"); } catch { /* unbekannt */ }
+    if (st === "granted") { openFile(); return; }
+    if (st === "denied") {
+      showBanner("Der Dateizugriff ist abgelehnt. Ohne ihn zeigt die App nur Beispieldaten.",
+        [["Berechtigungen öffnen", () => desktop.permissions.manage().then(openFile).catch(() => toast("Die Berechtigungen ließen sich nicht öffnen."))]]);
+      return;
+    }
+    showBanner("Die App möchte " + state.path + " lesen und schreiben. Claude fragt dich dafür einmal nach dem Dateizugriff.",
+      [["todo.txt öffnen", openFile], ["Pfad ändern", changePath]]);
+    return;
+  }
+  // Kein direkter Dateizugriff (z. B. Linux-Client): MCP-Brücke host:todotxt versuchen
+  try { mcp = (await window.claude?.use?.("mcp")) ?? null; } catch { mcp = null; }
+  if (mcp) {
+    backend = mcpBackend;
+    let perm = "prompt";
+    try { const p = await window.claude.use("permissions"); perm = p ? await p.state("mcp:" + MCP_SERVER) : "prompt"; } catch { /* unbekannt */ }
+    if (perm === "granted") { openFile(); return; }
+    if (perm !== "unavailable" && perm !== "denied") {
+      showBanner("Die App kann deine todo.txt über den lokalen todo.txt-Server lesen und schreiben. Claude fragt dich dafür einmal nach der Erlaubnis.",
+        [["todo.txt öffnen", openFile]]);
+      return;
+    }
+  }
+  const inst = await desktop?.install?.state().catch(() => "unavailable");
+  if (inst === "available") {
+    showBanner("Du siehst Beispieldaten. Installiere die App, dann bearbeitet sie deine echte todo.txt direkt auf der Festplatte.",
+      [["Als App installieren", () => desktop.install.request().catch(() => toast("Die Installation ließ sich nicht starten."))]]);
+  } else if (inst === "installed") {
+    showBanner("Du siehst Beispieldaten. Öffne die installierte App „Todo.txt Desktop“, um deine echte todo.txt zu bearbeiten.");
+  } else {
+    showBanner("Du siehst Beispieldaten. Deine echte todo.txt öffnet sich nur in der Claude-Desktop-App, dort lässt sich die Seite als App installieren.");
+  }
+})();
+</script>
