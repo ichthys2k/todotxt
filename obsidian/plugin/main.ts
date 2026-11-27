@@ -16,6 +16,7 @@ import { AppView, APP_VIEW } from './appView';
 
 const LS_TODO = 'todotxt-kursaufgaben-path';
 const LS_ARCHIVE = 'todotxt-obsidian-archive-path';
+const LS_SIDEBAR = 'todotxt-obsidian-sidebar-mode';
 const DEFAULT_TODO = '~/sync/todotxt/todo.txt';
 const POLL_MS = 3000;
 
@@ -25,6 +26,8 @@ export default class TodoTxtPlugin extends Plugin {
   files!: FileAccess;
   todoPath = '';
   archivePath = '';
+  /** Right sidebar: full app filtered to the course, or the compact list. Per device. */
+  sidebarMode: 'app' | 'kompakt' = 'app';
   lines: string[] = [];
   error: string | null = null;
   currentFile: TFile | null = null;
@@ -40,6 +43,7 @@ export default class TodoTxtPlugin extends Plugin {
     this.files = new FileAccess(this.app);
     this.todoPath = this.loadLocal(LS_TODO) || (Platform.isDesktopApp ? DEFAULT_TODO : '');
     this.archivePath = this.loadLocal(LS_ARCHIVE) || '';
+    this.sidebarMode = this.loadLocal(LS_SIDEBAR) === 'kompakt' ? 'kompakt' : 'app';
 
     this.registerView(KURS_VIEW, (leaf) => new KursView(leaf, this));
     this.registerView(APP_VIEW, (leaf) => new AppView(leaf, this));
@@ -308,6 +312,18 @@ class TodoTxtSettings extends PluginSettingTab {
       .setName('archive.txt')
       .setDesc('Für das Archiv der vollen App. Leer lassen, wenn du keins nutzt.')
       .addText((t) => t.setPlaceholder(Platform.isDesktopApp ? '~/sync/todotxt/archive.txt' : 'todotxt/archive.txt').setValue(p.archivePath).onChange((v) => p.setArchivePath(v)));
+    new Setting(containerEl)
+      .setName('Seitenleiste')
+      .setDesc('„App“ zeigt die volle App, gefiltert auf den Kurs der geöffneten Stunde. „Kompakt“ zeigt eine schlichte Liste.')
+      .addDropdown((d) => d
+        .addOption('app', 'App (gefiltert auf den Kurs)')
+        .addOption('kompakt', 'Kompakt')
+        .setValue(p.sidebarMode)
+        .onChange((v) => {
+          p.sidebarMode = v === 'kompakt' ? 'kompakt' : 'app';
+          p.saveLocal(LS_SIDEBAR, p.sidebarMode);
+          p.renderKursViews();
+        }));
     const status = containerEl.createEl('p');
     const show = () => status.setText(p.error ? '⚠ ' + p.error : '✓ ' + p.lines.filter((l) => l.trim()).length + ' Aufgaben gelesen.');
     new Setting(containerEl)
