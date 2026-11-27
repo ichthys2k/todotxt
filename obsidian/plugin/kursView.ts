@@ -26,14 +26,27 @@ const resolveProject = (kurs: string, lines: string[]): string => {
   return kurs;
 };
 
-export const kurseFromFrontmatter = (fm: any): string[] => {
+const asList = (v: unknown): string[] =>
+  v == null ? [] : (Array.isArray(v) ? v : String(v).split(/[,\s]+/)).map((s) => String(s).trim()).filter(Boolean);
+
+/**
+ * todo.txt projects (lowercase, without "+") for a note:
+ * - Lesson: `Kontext/Kurs: @kurs/m/6c` -> ["kurs/m/6c"]
+ * - Project file (Kategorie "Projekt" or name "… - Projektplanung"): the first entry of
+ *   `Tags`/`tags`, e.g. "kurs/m/6c", "stvp", "ag/minecraft" (same rule as update_project_todos.py).
+ */
+export const projectsForNote = (fm: any, basename?: string): string[] => {
   if (!fm) return [];
-  let v = fm[KURS_FIELD];
-  if (v == null) return [];
-  if (!Array.isArray(v)) v = [v];
-  return v
-    .map((s: unknown) => String(s).trim().replace(/^[@+#]/, '').toLowerCase())
-    .filter((s: string) => /^kurs\//.test(s));
+  const kurse = asList(fm[KURS_FIELD])
+    .map((s) => s.replace(/^[@+#]/, '').toLowerCase())
+    .filter((s) => /^kurs\//.test(s));
+  if (kurse.length) return kurse;
+  const isProject =
+    asList(fm['Kategorie'] ?? fm['kategorie']).some((k) => k.toLowerCase() === 'projekt') ||
+    /- Projektplanung$/.test(basename ?? '');
+  if (!isProject) return [];
+  const first = asList(fm['Tags'] ?? fm['tags'])[0];
+  return first ? [first.replace(/^[#+@]/, '').toLowerCase()] : [];
 };
 
 const parseIso = (s?: string) => {
@@ -72,7 +85,7 @@ export class KursView extends ItemView {
   private currentKurse(): string[] {
     const file = this.plugin.currentFile;
     const fm = file ? this.app.metadataCache.getFileCache(file)?.frontmatter : null;
-    return kurseFromFrontmatter(fm);
+    return projectsForNote(fm, file?.basename);
   }
 
   /** Full app in the sidebar, filtered to the course of the current note. */
@@ -129,7 +142,7 @@ export class KursView extends ItemView {
 
     const file = p.currentFile;
     const fm = file ? this.app.metadataCache.getFileCache(file)?.frontmatter : null;
-    const kurse = kurseFromFrontmatter(fm);
+    const kurse = projectsForNote(fm, file?.basename);
 
     const head = root.createDiv({ cls: 'ttk-head' });
     head.createDiv({ cls: 'ttk-note', text: file ? file.basename : 'Keine Notiz geöffnet' });
@@ -144,8 +157,8 @@ export class KursView extends ItemView {
       root.createDiv({
         cls: 'ttk-empty',
         text: file
-          ? 'Diese Notiz hat keinen Kurs. Aufgaben erscheinen bei Stunden mit „Kontext/Kurs: @kurs/…“.'
-          : 'Öffne eine Stunde, dann erscheinen hier die Aufgaben ihres Kurses.',
+          ? "Diese Notiz hat weder Kurs noch Projekt-Tag. Aufgaben erscheinen bei Stunden (Kontext/Kurs) und Projektdateien (erstes Tag)."
+          : "Öffne eine Stunde oder Projektdatei, dann erscheinen hier ihre Aufgaben.",
       });
       return;
     }
