@@ -1,0 +1,9 @@
+{
+  "id": "todotxt-kursaufgaben",
+  "name": "Todo.txt",
+  "version": "0.2.0",
+  "minAppVersion": "1.4.0",
+  "description": "Die Todo.txt-App in Obsidian: Kursaufgaben zur geöffneten Stunde in der Seitenleiste und die vollständige App in einem Tab.",
+  "author": "ichthys2k",
+  "isDesktopOnly": false
+}

@@ -12,13 +12,14 @@ import { googleAuthService } from './services/googleAuthService';
 import { Capacitor } from '@capacitor/core';
 import { syncProfileManager } from './services/syncProfileManager';
 import { CookieConsentBanner } from './components/CookieConsentBanner';
+import { isElectronEnv } from './utils/hostEnv';
 
 function App() {
   const { instance, accounts, inProgress } = useMsal();
   const isAuthenticated = useIsAuthenticated();
   
   const [storageMode, setStorageMode] = useState<'local' | 'onedrive' | 'webdav' | 'git' | 'gdrive' | null>(() => {
-    const isElectron = typeof window !== 'undefined' && window.navigator.userAgent.toLowerCase().includes('electron');
+    const isElectron = isElectronEnv();
     const lastMode = localStorage.getItem('todo_txt_last_mode');
     const localSetupComplete = localStorage.getItem('todo_txt_local_setup_complete');
 
@@ -79,7 +80,7 @@ function App() {
 
     // Deep link listener for Electron
     let unsubscribeDeepLink: (() => void) | null = null;
-    const isElectron = typeof window !== 'undefined' && window.navigator.userAgent.toLowerCase().includes('electron');
+    const isElectron = isElectronEnv();
     if (isElectron && (window as any).electronAPI && (window as any).electronAPI.onDeepLink) {
       unsubscribeDeepLink = (window as any).electronAPI.onDeepLink((url: string) => {
         if ((window as any).handleElectronDeepLink) {
@@ -130,7 +131,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const isElectron = typeof window !== 'undefined' && window.navigator.userAgent.toLowerCase().includes('electron');
+    const isElectron = isElectronEnv();
     if (accounts.length > 0 && !isElectron) {
       instance.setActiveAccount(accounts[0]);
       setStorageMode('onedrive');

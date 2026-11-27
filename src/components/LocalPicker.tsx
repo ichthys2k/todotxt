@@ -8,6 +8,7 @@ import {
   selectElectronFile,
   setTodoFileHandle 
 } from '../services/storageService';
+import { isElectronEnv } from '../utils/hostEnv';
 
 const SafStorage = registerPlugin<any>('SafStorage');
 
@@ -19,7 +20,7 @@ interface LocalPickerProps {
 export const LocalPicker = ({ onFileSelected, onCancel }: LocalPickerProps) => {
   const [error, setError] = useState<string | null>(null);
   
-  const isElectron = typeof window !== 'undefined' && window.navigator.userAgent.toLowerCase().includes('electron');
+  const isElectron = isElectronEnv();
   const supportsFileSystemAccess = 'showOpenFilePicker' in window;
 
   const handleLinkLocal = async () => {

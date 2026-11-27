@@ -27,6 +27,7 @@ import type { Language } from '../services/translationService';
 import { getCoreTaskText } from '../utils/todoMerger';
 import { loginWithMicrosoft } from '../services/authService';
 import { googleAuthService } from '../services/googleAuthService';
+import { isElectronEnv } from '../utils/hostEnv';
 
 
 export interface CustomView {
@@ -208,7 +209,7 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
   const isWebDavMode = storageMode === 'webdav';
   const isGitMode = storageMode === 'git';
   const isGDriveMode = storageMode === 'gdrive';
-  const isElectron = typeof window !== 'undefined' && window.navigator.userAgent.toLowerCase().includes('electron');
+  const isElectron = isElectronEnv();
   const [tasks, setTasks] = useState<TodoTask[]>([]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(true);
