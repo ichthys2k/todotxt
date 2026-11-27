@@ -11,8 +11,8 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../../src/index.css';
 import { TodoApp } from '../../src/components/TodoApp';
-import { applyTheme } from '../../src/services/themeService';
 import { applyDensity } from '../../src/services/densityService';
+import { applyHostTheme, HOST_STYLE_EVENT } from './hostTheme';
 
 const bridge = (() => {
   try {
@@ -40,7 +40,10 @@ if (!bridge?.electronAPI) {
   localStorage.setItem('todo_txt_last_mode', 'local');
   localStorage.setItem('todo_txt_local_setup_complete', 'true');
 
-  applyTheme();
+  // Colours, fonts and light/dark of the active Obsidian theme; the plugin
+  // dispatches HOST_STYLE_EVENT when the Obsidian theme changes.
+  applyHostTheme();
+  window.addEventListener(HOST_STYLE_EVENT, applyHostTheme);
   applyDensity();
 
   root.render(
