@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Todo.txt",
+  "description": "Deine lokale todo.txt in der Seitenleiste: volle Todo.txt-App, Aufgaben per Rechtsklick und Adressleiste („todo …“).",
+  "version": "0.0.0",
+  "minimum_chrome_version": "116",
+  "permissions": ["sidePanel", "nativeMessaging", "contextMenus", "alarms"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "side_panel": { "default_path": "browser/app/sidepanel.html" },
+  "action": { "default_title": "Todo.txt", "default_icon": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png" } },
+  "icons": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png" },
+  "omnibox": { "keyword": "todo" },
+  "commands": {
+    "open-panel": { "suggested_key": { "default": "Ctrl+Shift+Y", "mac": "Command+Shift+Y" }, "description": "Todo.txt-Seitenleiste öffnen" }
+  }
+}

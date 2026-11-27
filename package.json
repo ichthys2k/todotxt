@@ -25,7 +25,8 @@
     "cap:sync": "npm run build && npx cap sync",
     "cap:open": "npx cap open",
     "cap:build": "npm run build && npx cap copy && npx cap sync",
-    "obsidian:build": "node obsidian/build.mjs"
+    "obsidian:build": "node obsidian/build.mjs",
+    "browser:build": "node browser/build.mjs"
   },
   "dependencies": {
     "@capawesome/capacitor-google-sign-in": "^0.1.2",
