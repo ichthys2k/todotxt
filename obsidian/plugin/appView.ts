@@ -24,16 +24,12 @@ export class AppView extends ItemView {
     let html: string;
     try {
       html = await this.plugin.loadAppHtml();
-    } catch (e: any) {
-      this.contentEl.createDiv({ cls: 'ttk-error', text: 'Die App-Datei app.html fehlt im Plugin-Ordner: ' + (e?.message || e) });
+    } catch (e) {
+      this.contentEl.createDiv({ cls: 'ttk-error', text: 'Die App-Datei app.html fehlt im Plugin-Ordner: ' + String(e) });
       return;
     }
     this.frame = this.contentEl.createEl('iframe', { cls: 'ttk-app-frame', attr: { title: 'Todo.txt' } });
     this.frame.srcdoc = html;
-  }
-
-  reloadApp() {
-    if (this.frame) this.frame.srcdoc = this.frame.srcdoc;
   }
 
   async onClose() {
