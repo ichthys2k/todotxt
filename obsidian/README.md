@@ -2,7 +2,9 @@
 
 Obsidian-Plugin (`todotxt-kursaufgaben`) mit zwei Ansichten auf dieselbe `todo.txt`:
 
-- **Kursaufgaben** (rechte Seitenleiste): offene Aufgaben zum Kurs der geöffneten Stunde.
+- **Kursaufgaben** (rechte Seitenleiste): Aufgaben zum Kurs der geöffneten Stunde. Standard ist die
+  volle App im schmalen Layout, gefiltert auf `+kurs/…` (Filter per `HOST_FILTER_EVENT`, siehe
+  `src/utils/hostEnv.ts`). Alternativ, je Gerät einstellbar: eine kompakte Liste.
   Das Frontmatter `Kontext/Kurs: @kurs/m/6c` wird dem Projekt `+kurs/m/6c` zugeordnet.
 - **Todo.txt** (Tab): die vollständige Web-App. Sie läuft in einem iframe und nutzt ihren
   Electron-Dateimodus. Das Plugin stellt dafür ein kompatibles `window.electronAPI` bereit

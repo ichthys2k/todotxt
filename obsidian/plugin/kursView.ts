@@ -1,14 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- Obsidian API is used without its type package */
 /**
- * Minimal view: open tasks of the course of the current lesson note, in the right sidebar.
+ * Right sidebar: tasks of the course of the current lesson note.
  * Mapping: frontmatter `Kontext/Kurs: @kurs/m/6c` -> todo.txt project `+kurs/m/6c`.
+ *
+ * Two modes (per device, see settings):
+ * - "app": the full web app in its narrow responsive layout, filtered to the course.
+ *   The filter follows the open note; inside the app it can be cleared as usual.
+ * - "kompakt": a small native list (open tasks, check off, add).
  */
 import { ItemView, type WorkspaceLeaf } from 'obsidian';
 import { parseTask, completeTask, serializeTask, getTodayDate, type TodoTask } from '../../src/services/todoParser';
+import { HOST_FILTER_EVENT } from '../../src/utils/hostEnv';
 import type TodoTxtPlugin from './main';
 
 export const KURS_VIEW = 'ttk-kursaufgaben';
 const KURS_FIELD = 'Kontext/Kurs';
+
+/** Spelling of the project as used in todo.txt (the app filters case-sensitively). */
+const resolveProject = (kurs: string, lines: string[]): string => {
+  for (const l of lines) {
+    for (const w of l.split(/\s+/)) {
+      if (w.startsWith('+') && w.slice(1).toLowerCase() === kurs) return w.slice(1);
+    }
+  }
+  return kurs;
+};
 
 export const kurseFromFrontmatter = (fm: any): string[] => {
   if (!fm) return [];
@@ -47,8 +63,53 @@ export class KursView extends ItemView {
   getViewType() { return KURS_VIEW; }
   getDisplayText() { return 'Kursaufgaben'; }
   getIcon() { return 'list-checks'; }
+  private frame: HTMLIFrameElement | null = null;
+  private frameProject: string | null = null;
+
   async onOpen() { this.render(); }
-  async onClose() { this.contentEl.empty(); }
+  async onClose() { this.frame = null; this.contentEl.empty(); }
+
+  private currentKurse(): string[] {
+    const file = this.plugin.currentFile;
+    const fm = file ? this.app.metadataCache.getFileCache(file)?.frontmatter : null;
+    return kurseFromFrontmatter(fm);
+  }
+
+  /** Full app in the sidebar, filtered to the course of the current note. */
+  private renderApp() {
+    const kurse = this.currentKurse();
+    const project = kurse.length ? resolveProject(kurse[0], this.plugin.lines) : null;
+    if (this.frame?.isConnected) {
+      if (project !== this.frameProject) {
+        this.frameProject = project;
+        this.frame.dataset.project = project ?? '';
+        const win = this.frame.contentWindow as any;
+        win?.dispatchEvent(new win.CustomEvent(HOST_FILTER_EVENT, { detail: { project } }));
+      }
+      return;
+    }
+    const root = this.contentEl;
+    root.empty();
+    root.removeClass('ttk-view');
+    root.addClass('ttk-app-host');
+    const frame = root.createEl('iframe', { cls: 'ttk-app-frame', attr: { title: 'Todo.txt' } });
+    frame.dataset.project = project ?? '';
+    this.frame = frame;
+    this.frameProject = project;
+    this.plugin.loadAppHtml().then(
+      (html) => { if (this.frame === frame) frame.srcdoc = html; },
+      (e) => { root.createDiv({ cls: 'ttk-error', text: 'Die App-Datei app.html fehlt im Plugin-Ordner: ' + String(e) }); },
+    );
+  }
+
+  render() {
+    if (this.plugin.sidebarMode === 'app') return this.renderApp();
+    if (this.frame) {
+      this.frame = null;
+      this.contentEl.removeClass('ttk-app-host');
+    }
+    this.renderCompact();
+  }
 
   private tasks(): Task[] {
     return this.plugin.lines
@@ -57,7 +118,7 @@ export class KursView extends ItemView {
       .map((x) => ({ ...parseTask(x.raw), idx: x.idx }));
   }
 
-  render() {
+  private renderCompact() {
     const p = this.plugin;
     const root = this.contentEl;
     const draft = root.querySelector('.ttk-add input') as HTMLInputElement | null;

@@ -32,7 +32,9 @@ if (!bridge?.electronAPI) {
   );
 } else {
   window.electronAPI = bridge.electronAPI;
-  window.__todoTxtHost = { name: 'obsidian' };
+  // The sidebar iframe carries the course project of the current note (data-project)
+  const frame = window.frameElement as HTMLElement | null;
+  window.__todoTxtHost = { name: 'obsidian', initialProject: frame?.dataset.project || null };
 
   // Always use the local file mode inside Obsidian
   localStorage.setItem('todo_txt_last_mode', 'local');

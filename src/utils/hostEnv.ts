@@ -9,13 +9,28 @@
  * build, also on hosts whose user agent is not Electron (Obsidian mobile).
  */
 
+export interface TodoTxtHost {
+  name: string;
+  /** Project filter to start with (without "+"), e.g. "kurs/m/6c". */
+  initialProject?: string | null;
+}
+
 declare global {
   interface Window {
-    __todoTxtHost?: { name: string };
+    __todoTxtHost?: TodoTxtHost;
   }
 }
 
-export const isEmbedded = (): boolean => typeof window !== 'undefined' && !!window.__todoTxtHost;
+/**
+ * Event the host dispatches on the app's window to change the project filter:
+ * `new CustomEvent(HOST_FILTER_EVENT, { detail: { project: 'kurs/m/6c' | null } })`
+ */
+export const HOST_FILTER_EVENT = 'todotxt:filter';
+
+export const getHost = (): TodoTxtHost | undefined =>
+  typeof window !== 'undefined' ? window.__todoTxtHost : undefined;
+
+export const isEmbedded = (): boolean => !!getHost();
 
 /** True for the Electron desktop build and for embedded hosts that provide electronAPI. */
 export const isElectronEnv = (): boolean =>

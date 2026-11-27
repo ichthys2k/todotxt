@@ -27,7 +27,7 @@ import type { Language } from '../services/translationService';
 import { getCoreTaskText } from '../utils/todoMerger';
 import { loginWithMicrosoft } from '../services/authService';
 import { googleAuthService } from '../services/googleAuthService';
-import { isElectronEnv } from '../utils/hostEnv';
+import { isElectronEnv, isEmbedded, getHost, HOST_FILTER_EVENT } from '../utils/hostEnv';
 
 
 export interface CustomView {
@@ -1180,9 +1180,23 @@ export const TodoApp = ({ storageMode, onLogout, onSetupSync, username: _usernam
 
   
   // Filter States
-  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [selectedProject, setSelectedProject] = useState<string | null>(() => getHost()?.initialProject ?? null);
   const [selectedContext, setSelectedContext] = useState<string | null>(null);
   const [selectedAssignee, setSelectedAssignee] = useState<string | null>(null);
+
+  // Embedded hosts (Obsidian sidebar) can set the project filter from outside
+  useEffect(() => {
+    if (!isEmbedded()) return;
+    const onHostFilter = (e: Event) => {
+      const project = (e as CustomEvent<{ project: string | null }>).detail?.project ?? null;
+      setSelectedProject(project);
+      setSelectedContext(null);
+      setActiveSmartView(null);
+      setCurrentView('todo');
+    };
+    window.addEventListener(HOST_FILTER_EVENT, onHostFilter);
+    return () => window.removeEventListener(HOST_FILTER_EVENT, onHostFilter);
+  }, []);
 
   // File Selection State
   const hasLocalFileSelected = () => {
