@@ -83,11 +83,20 @@ export default class TodoTxtPlugin extends Plugin {
     this.registerEvent(this.app.metadataCache.on('changed', (file) => {
       if (file === this.currentFile) this.renderKursViews();
     }));
+    this.registerEvent(this.app.workspace.on('css-change', () => this.pushHostStyle()));
     this.registerInterval(window.setInterval(() => this.poll(), POLL_MS));
   }
 
   onunload() {
     delete (window as any).__todoTxtBridge;
+  }
+
+  /** Tells every embedded app to re-read the Obsidian theme (colours, light/dark). */
+  private pushHostStyle() {
+    document.querySelectorAll<HTMLIFrameElement>('iframe.ttk-app-frame').forEach((f) => {
+      const w = f.contentWindow as any;
+      try { w?.dispatchEvent(new w.Event('todotxt:host-style')); } catch { /* not loaded yet */ }
+    });
   }
 
   // ---------- per-device settings ----------

@@ -27,3 +27,10 @@ weil Obsidian mobile selbst auf Capacitor läuft.
 Die Pfade zu `todo.txt` und `archive.txt` werden je Gerät gespeichert (Obsidian-localStorage),
 nicht im synchronisierten Vault. Am Rechner gehen absolute Pfade (`~/sync/todotxt/todo.txt`),
 auf dem Handy nur Pfade innerhalb des Vaults. Die App darf nur diese beiden Dateien lesen und schreiben.
+
+## Aussehen
+
+Die App übernimmt Farben, Schrift und Hell/Dunkel des aktiven Obsidian-Themes (`app/hostTheme.ts`).
+Dazu werden die Tailwind-Variablen `--color-slate-*` (Neutraltöne) und `--color-indigo-*` (Akzent)
+auf Obsidian-Variablen wie `--background-primary`, `--text-normal` und `--interactive-accent` umgelegt.
+Bei einem Theme-Wechsel (`css-change`) schickt das Plugin `todotxt:host-style` an alle eingebetteten Apps.
